@@ -59,6 +59,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -134,6 +135,9 @@ details.help[open] > summary { margin-bottom: 8px; }
 .range button { border: 0; border-radius: 0; border-right: 1px solid var(--line); padding: 6px 12px; font-size: 13px; background: var(--surface); color: var(--ink-2); }
 .range button:last-child { border-right: 0; }
 .range button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.empty-state { background: var(--surface); border: 1px dashed var(--ink-3); border-radius: var(--radius); padding: 28px 20px; text-align: center; color: var(--ink-2); }
+.empty-state h2 { margin: 0 0 6px; font-family: var(--font-display); font-weight: 500; font-size: 20px; color: var(--ink); }
+.empty-state p { margin: 0 auto; max-width: 60ch; }
 .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .tile { padding: 14px 16px; border-left: 3px solid var(--wheat); background: var(--surface); border-radius: 0 8px 8px 0; }
 .tile .k { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-2); }
@@ -203,7 +207,6 @@ footer a { color: var(--ink-2); }
         <span class="note">Works with the files from the R or Python script, or any sheet with Age and Died columns.</span></span>
       </label>
       <div class="row">
-        <button type="button" id="sampleBtn" data-i18n="sampleBtn">Show sample player</button>
         <button type="button" id="saveBtn" class="primary" data-i18n="saveBtn">Save chart image</button>
         <button type="button" id="csvBtn" data-i18n="csvBtn">Save CSV</button>
       </div>
@@ -229,7 +232,11 @@ footer a { color: var(--ink-2); }
     </section>
   </div>
 
-  <div class="range-row">
+  <div class="empty-state" id="emptyState" hidden>
+    <h2 data-i18n="emptyTitle">No player loaded yet</h2>
+    <p data-i18n-html="emptyHtml"></p>
+  </div>
+  <div class="range-row" id="rangeRow">
     <span class="lbl" data-i18n="rangeLabel">Time range</span>
     <div class="range" role="group" id="rangeBar"></div>
   </div>
@@ -263,7 +270,9 @@ const I18N = {
     intro: "Charts of one player's One Hour One Life history, from the lives list on OHOLCurse. Everything runs in your browser. Nothing is uploaded.",
     loadFile: "Load a file",
     dropHtml: '<strong>Drop a CSV or Excel file here</strong>, or click to choose one.<br><span class="note">Works with the files from the R or Python script, or any sheet with Age and Died columns.</span>',
-    sampleBtn: "Show sample player", saveBtn: "Save chart image", csvBtn: "Save CSV",
+    saveBtn: "Save chart image", csvBtn: "Save CSV",
+    emptyTitle: "No player loaded yet",
+    emptyHtml: "Use the <b>OHOL Stats</b> bookmark on an oholcurse.com player page, or drop a CSV or Excel file above. The charts will appear here.",
     fromOhol: "Or read straight from OHOLCurse",
     step1: "Drag this button to your bookmarks bar:",
     step2: "Open any player on <b>oholcurse.com</b>. Search by leaderboard, curse or character name.",
@@ -304,8 +313,7 @@ const I18N = {
 <p>Copy the bookmark code, make a new bookmark by hand, and paste the code as its address. Clicking the button on this page does nothing on purpose. It only works from the bookmarks bar while you are on oholcurse.com.</p></div>`,
     visits: "Page views:",
     footer: 'Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life\'s birth time is its death time minus its age in minutes.',
-    player: "Player", samplePlayer: "Sample player (made up data)",
-    srcSample: "the sample", srcOhol: "OHOLCurse", srcLast: "your last OHOLCurse visit",
+    player: "Player", srcOhol: "OHOLCurse", srcLast: "your last OHOLCurse visit",
     showing: (n, src) => `Showing ${n} lives${src ? " from " + src : ""}.`,
     noLives: "No lives found. The file needs at least an Age column and a Died column.",
     reading: (f) => `Reading ${f} ...`,
@@ -352,7 +360,9 @@ const I18N = {
     intro: "根据 OHOLCurse 上的生命记录，画出一个玩家的《One Hour One Life》游戏统计图。所有计算都在你的浏览器里完成，不会上传任何数据。",
     loadFile: "读取文件",
     dropHtml: '<strong>把 CSV 或 Excel 文件拖到这里</strong>，或者点击选择文件。<br><span class="note">可以用 R 或 Python 脚本导出的文件，也可以用任何带 Age 和 Died 两列的表格。</span>',
-    sampleBtn: "显示示例玩家", saveBtn: "保存统计图", csvBtn: "保存 CSV",
+    saveBtn: "保存统计图", csvBtn: "保存 CSV",
+    emptyTitle: "还没有读取玩家数据",
+    emptyHtml: "在 oholcurse.com 的玩家页面上点 <b>OHOL Stats</b> 书签，或者把 CSV、Excel 文件拖到上面。统计图会显示在这里。",
     fromOhol: "或者直接从 OHOLCurse 读取",
     step1: "把这个按钮拖到浏览器的书签栏：",
     step2: "在 <b>oholcurse.com</b> 上打开任意一个玩家的页面。可以按排行榜名、curse 名或角色名搜索。",
@@ -393,8 +403,7 @@ const I18N = {
 <p>点<b>复制书签代码</b>，手动新建一个书签，把代码粘贴到网址那一栏。在这个网页上直接点 OHOL Stats 按钮是没有反应的，这是正常的。它只有在 oholcurse.com 的页面上、从书签栏点击时才会运行。</p></div>`,
     visits: "本页访问量：",
     footer: '数据来自 <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>。游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。',
-    player: "玩家", samplePlayer: "示例玩家（虚构数据）",
-    srcSample: "示例数据", srcOhol: "OHOLCurse", srcLast: "上次从 OHOLCurse 读取的数据",
+    player: "玩家", srcOhol: "OHOLCurse", srcLast: "上次从 OHOLCurse 读取的数据",
     showing: (n, src) => `共 ${n} 条生命记录${src ? "，来自" + src : ""}。`,
     noLives: "没有找到生命记录。文件至少需要 Age 和 Died 两列。",
     reading: (f) => `正在读取 ${f} ...`,
@@ -530,12 +539,19 @@ function livesFromBookmarklet(rows, utc) {
 }
 
 // ---------- Loading ----------
+// Before any player is loaded, show a hint instead of empty charts
+function showEmpty(on) {
+  $("emptyState").hidden = !on;
+  for (const id of ["rangeRow", "tiles", "charts", "tableBox"]) $(id).hidden = on;
+}
+
 // player and source can be plain text, or { key } for text that follows the language
 function load(lives, player, source) {
   if (!lives.length) { setStatus(tr("noLives"), true); return; }
   lives.sort((a, b) => b.died - a.died);
   LIVES = lives;
   LAST = { player, source };
+  showEmpty(false);
   showLoaded();
   renderAll();
 }
@@ -563,34 +579,6 @@ async function readFile(file) {
   } catch (e) {
     setStatus(tr("badFile", e.message), true);
   }
-}
-
-// Sample player with made up lives, so the page shows what it does before you load anything
-function samplePlayer() {
-  let seed = 7;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  const firsts = ["ROSE", "OAK", "LILY", "FINN", "IVY", "JUNO", "ROWAN", "WREN", "ASH", "MAPLE", "SAGE", "OTIS"];
-  const lasts = ["BERRY", "STONE", "RIVER", "MILL", "HONEY", "FROST", "BROOK", "FERN"];
-  const causes = [["hunger", 30], ["Wolf", 4], ["Wild_Boar", 3], ["Yellow_Fever", 2], ["killer", 2], ["Rattle_Snake", 1], ["Hungry_Grizzly_Bear", 1]];
-  const total = causes.reduce((s, c) => s + c[1], 0);
-  const lives = [];
-  const start = new Date(); start.setMonth(start.getMonth() - 14);
-  for (let i = 0; i < 420; i++) {
-    const day = new Date(start.getTime() + rnd() * 420 * 86400000);
-    const hour = [18, 19, 20, 20, 21, 21, 22, 22, 23, 0, 1, 13, 15, 17][Math.floor(rnd() * 14)];
-    const born = new Date(day.getFullYear(), day.getMonth(), day.getDate(), hour, Math.floor(rnd() * 60), Math.floor(rnd() * 60));
-    if (born > new Date()) continue;
-    let age = 60, cause = "oldAge";
-    if (rnd() < 0.36) {
-      age = Math.round((rnd() < 0.3 ? rnd() * 12 : 12 + rnd() * 47) * 100) / 100;
-      let r = rnd() * total;
-      for (const [c, w] of causes) { if ((r -= w) <= 0) { cause = c; break; } }
-    }
-    const eve = rnd() < 0.08;
-    lives.push(makeLife(eve ? "EVE" : firsts[Math.floor(rnd() * firsts.length)], lasts[Math.floor(rnd() * lasts.length)],
-      9000000 + i, age, rnd() < 0.7 ? "female" : "male", "", cause, new Date(born.getTime() + age * 60000)));
-  }
-  return lives;
 }
 
 // ---------- Chart drawing ----------
@@ -1091,7 +1079,6 @@ drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " "
 ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
 ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
 drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) readFile(f); });
-$("sampleBtn").addEventListener("click", () => load(samplePlayer(), { key: "samplePlayer" }, { key: "srcSample" }));
 $("saveBtn").addEventListener("click", () => saveImage().catch((e) => setStatus(tr("saveFail", e.message), true)));
 $("csvBtn").addEventListener("click", saveCsv);
 
@@ -1099,7 +1086,7 @@ const rerender = () => LIVES.length && renderAll();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rerender);
 new MutationObserver(rerender).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-// Start with the last OHOLCurse player you opened, or the sample
+// Start with the last OHOLCurse player you opened, or the empty hint
 let started = false;
 if (location.hash !== "#from-oholcurse") {
   try {
@@ -1107,7 +1094,7 @@ if (location.hash !== "#from-oholcurse") {
     if (last && Array.isArray(last.rows)) { load(livesFromBookmarklet(last.rows, !!last.utc), last.player, { key: "srcLast" }); started = true; }
   } catch (_) {}
 }
-if (!started && location.hash !== "#from-oholcurse") load(samplePlayer(), { key: "samplePlayer" }, { key: "srcSample" });
+showEmpty(!started);
 })();
 </script>
 </body>
