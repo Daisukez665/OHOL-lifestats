@@ -29,7 +29,7 @@ The tool comes in three forms: a web page, a Python script and an R script. The 
 
 ### Web page
 
-Open **https://daisukez665.github.io/ohol-lifestats/**
+Open **https://daisukez665.github.io/OHOL-lifestats/**
 
 Everything runs in your browser. Your game data is never sent anywhere.
 
@@ -150,7 +150,7 @@ Files go into an `output` folder:
 
 ### 网页版
 
-打开 **https://daisukez665.github.io/ohol-lifestats/**
+打开 **https://daisukez665.github.io/OHOL-lifestats/**
 
 所有计算都在你的浏览器里完成，游戏数据不会发送到任何地方。
 
