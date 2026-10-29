@@ -1,4 +1,4 @@
-# One Hour One Life (OHOL) Statistics
+# One Hour One Life (OHOL) Statistics 一小时人生 游戏统计
 
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fdaisukez665.github.io%2FOHOL-lifestats%2F&label=website)](https://daisukez665.github.io/OHOL-lifestats/)
 [![pages-build-deployment](https://github.com/Daisukez665/OHOL-lifestats/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/Daisukez665/OHOL-lifestats/actions/workflows/pages/pages-build-deployment)
