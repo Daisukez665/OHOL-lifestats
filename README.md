@@ -124,7 +124,7 @@ Files go into an `output` folder:
 * OHOLCurse gives times in UTC. They are converted to your own time zone.
 * One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.
 * Deaths by another player show as `killer`. All boar deaths are grouped as `Boar`.
-* Most players never play in Donkey Town, so its lives are left out of the charts by default in all three versions. They are found by their location, far to the west of the normal world.
+* Most players never play in Donkey Town, so its lives are left out of the charts by default in all three versions.
 * Each run sends only a few requests. Please be kind to OHOLCurse and do not run it in a loop.
 * If OHOLCurse changes its page layout, the tool may stop working. Please open an issue.
 
