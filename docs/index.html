@@ -69,6 +69,10 @@ header.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; j
   line-height: 1.05; margin: 0; letter-spacing: -0.01em; text-wrap: balance;
 }
 .brand p { margin: 6px 0 0; color: var(--ink-2); max-width: 62ch; }
+.side { display: grid; gap: 8px; justify-items: end; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.lang button { border: 0; border-radius: 0; padding: 5px 12px; font-size: 13px; background: var(--surface); color: var(--ink-2); }
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .player-tag { font-family: var(--font-data); font-size: 13px; color: var(--ink-2); }
 .player-tag b { color: var(--ink); font-weight: 500; }
 
@@ -139,6 +143,7 @@ footer { font-size: 13px; color: var(--ink-3); }
 footer a { color: var(--ink-2); }
 
 @media (max-width: 820px) {
+  .side { justify-items: start; }
   .controls { grid-template-columns: 1fr; }
   .grid { grid-template-columns: 1fr; }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -151,35 +156,41 @@ footer a { color: var(--ink-2); }
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <h1>OHOL Life Stats</h1>
-      <p>Charts of one player's One Hour One Life history, from the lives list on OHOLCurse. Everything runs in your browser. Nothing is uploaded.</p>
+      <h1 data-i18n="title">OHOL Life Stats</h1>
+      <p data-i18n="intro">Charts of one player's One Hour One Life history, from the lives list on OHOLCurse. Everything runs in your browser. Nothing is uploaded.</p>
     </div>
-    <div class="player-tag" id="playerTag"></div>
+    <div class="side">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="false">English</button>
+        <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+      </div>
+      <div class="player-tag" id="playerTag"></div>
+    </div>
   </header>
 
   <div class="controls">
     <section aria-labelledby="h-file">
-      <h2 id="h-file">Load a file</h2>
+      <h2 id="h-file" data-i18n="loadFile">Load a file</h2>
       <label class="drop" id="drop" tabindex="0">
         <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
-        <strong>Drop a CSV or Excel file here</strong>, or click to choose one.<br>
-        <span class="note">Works with the files from the R or Python script, or any sheet with Age and Died columns.</span>
+        <span data-i18n-html="dropHtml"><strong>Drop a CSV or Excel file here</strong>, or click to choose one.<br>
+        <span class="note">Works with the files from the R or Python script, or any sheet with Age and Died columns.</span></span>
       </label>
       <div class="row">
-        <button type="button" id="sampleBtn">Show sample player</button>
-        <button type="button" id="saveBtn" class="primary">Save chart image</button>
-        <button type="button" id="csvBtn">Save CSV</button>
+        <button type="button" id="sampleBtn" data-i18n="sampleBtn">Show sample player</button>
+        <button type="button" id="saveBtn" class="primary" data-i18n="saveBtn">Save chart image</button>
+        <button type="button" id="csvBtn" data-i18n="csvBtn">Save CSV</button>
       </div>
       <p class="status" id="status" role="status"></p>
     </section>
     <section aria-labelledby="h-bm">
-      <h2 id="h-bm">Or read straight from OHOLCurse</h2>
+      <h2 id="h-bm" data-i18n="fromOhol">Or read straight from OHOLCurse</h2>
       <ol class="steps">
-        <li>Drag this button to your bookmarks bar: <a class="btn bookmarklet" id="bmLink" href="#" title="Drag me to your bookmarks bar">OHOL Stats</a></li>
-        <li>Open any player on <b>oholcurse.com</b>. Search by leaderboard, curse or character name.</li>
-        <li>Click the bookmark. A new tab opens here with that player's charts.</li>
+        <li><span data-i18n="step1">Drag this button to your bookmarks bar:</span> <a class="btn bookmarklet" id="bmLink" href="#" title="Drag me to your bookmarks bar">OHOL Stats</a></li>
+        <li data-i18n-html="step2">Open any player on <b>oholcurse.com</b>. Search by leaderboard, curse or character name.</li>
+        <li data-i18n="step3">Click the bookmark. A new tab opens here with that player's charts.</li>
       </ol>
-      <p class="note" id="bmNote">If your browser blocks the new tab, allow pop ups for oholcurse.com and click again.</p>
+      <p class="note" id="bmNote" data-i18n="bmNote">If your browser blocks the new tab, allow pop ups for oholcurse.com and click again.</p>
     </section>
   </div>
 
@@ -187,11 +198,11 @@ footer a { color: var(--ink-2); }
   <div class="grid" id="charts"></div>
 
   <details class="table" id="tableBox">
-    <summary>All lives as a table</summary>
+    <summary data-i18n="tableSummary">All lives as a table</summary>
     <div class="tbl-wrap" id="tableWrap"></div>
   </details>
 
-  <footer>Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.</footer>
+  <footer data-i18n-html="footer">Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.</footer>
 </div>
 <div class="tip" id="tip" hidden></div>
 
@@ -204,10 +215,140 @@ const DEFAULT_APP_URL = "https://xiyuez1.github.io/OneHourOneLife-Statistics/";
 const OHOL_ORIGIN = "https://oholcurse.com";
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const $ = (id) => document.getElementById(id);
+
+// ---------- Languages ----------
+const I18N = {
+  en: {
+    title: "OHOL Life Stats",
+    intro: "Charts of one player's One Hour One Life history, from the lives list on OHOLCurse. Everything runs in your browser. Nothing is uploaded.",
+    loadFile: "Load a file",
+    dropHtml: '<strong>Drop a CSV or Excel file here</strong>, or click to choose one.<br><span class="note">Works with the files from the R or Python script, or any sheet with Age and Died columns.</span>',
+    sampleBtn: "Show sample player", saveBtn: "Save chart image", csvBtn: "Save CSV",
+    fromOhol: "Or read straight from OHOLCurse",
+    step1: "Drag this button to your bookmarks bar:",
+    step2: "Open any player on <b>oholcurse.com</b>. Search by leaderboard, curse or character name.",
+    step3: "Click the bookmark. A new tab opens here with that player's charts.",
+    bmNote: "If your browser blocks the new tab, allow pop ups for oholcurse.com and click again.",
+    bmTitle: "Drag me to your bookmarks bar",
+    tableSummary: "All lives as a table",
+    footer: 'Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life\'s birth time is its death time minus its age in minutes.',
+    player: "Player", samplePlayer: "Sample player (made up data)",
+    srcSample: "the sample", srcOhol: "OHOLCurse", srcLast: "your last OHOLCurse visit",
+    showing: (n, src) => `Showing ${n} lives${src ? " from " + src : ""}.`,
+    noLives: "No lives found. The file needs at least an Age column and a Died column.",
+    reading: (f) => `Reading ${f} ...`,
+    badFile: (e) => `Could not read that file. Use a .csv or .xlsx file with a header row. (${e})`,
+    loadFirst: "Load some lives first.",
+    saveFail: (e) => `Could not save the image: ${e}`,
+    dragHint: "Drag the OHOL Stats button to your bookmarks bar, then click it on an oholcurse.com player page.",
+    waiting: "Waiting for OHOLCurse to send the lives ...",
+    noData: "No data for this chart.",
+    tHours: "Hours played", tHoursSub: (d) => `${d} days`,
+    tLives: "Lives", tRange: (a, b) => `${a} to ${b}`,
+    t60: "Lived to 60", t60Sub: (n) => `${n} lives`,
+    tAvg: "Average age", tAvgSub: "years at death",
+    cHour: "Time of day", cHourSub: "Lives started in each hour",
+    cHourTip: (h, n, p) => `${h}:00 to ${h}:59  ${n} lives (${p}%)`,
+    cWeek: "Day of the week", cWeekSub: "Lives started on each weekday",
+    cWeekTip: (d, n, p) => `${d}: ${n} lives (${p}%)`,
+    cMonth: "Lives per month", cMonthSub: "From your first life to this month",
+    cMonthTip: (m, n) => `${m}: ${n} lives`,
+    cAge: "Age at death", cAgeSub: "Smoothed distribution, ages 0 to 60",
+    cAgeTip: (a, b, n, p) => `Age ${a} to ${b}: ${n} lives (${p}%)`,
+    cCause: "Causes of death", cCauseSub: "Top 10. All boars are grouped together",
+    cSex: "Character sex", cSexSub: "Share of all lives",
+    cFirst: "First names", cFirstSub: "Top 10, not counting EVE",
+    cLast: "Family names", cLastSub: "Top 10 surnames",
+    cDaily: "Hours played per day", cDailySub: "Each bar is one calendar day",
+    dailyPeak: (h, d) => `${h} h on ${d}`, dailyTip: (wd, d, h) => `${wd} ${d}: ${h} h`,
+    lives: "lives",
+    sex: { female: "Female", male: "Male", unknown: "Unknown" },
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    daysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    monthAxis: (y, m) => `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1]} ${String(y).slice(2)}`,
+    cause: (c) => c.replace(/_/g, " "),
+    cols: ["Date", "Name", "Surname", "Life ID", "Age", "Sex", "Died to", "Born", "Died"],
+    exportTitle: (p) => (p ? `OHOL Life Stats: ${p}` : "OHOL Life Stats"),
+    bm: { notPlayer: "OHOL Stats: open a player page on oholcurse.com first, then click the bookmark again.",
+          blocked: "OHOL Stats: the new tab was blocked. Allow pop ups for oholcurse.com and click again.",
+          reading: "OHOL Stats: reading lives...", read: "OHOL Stats: read N lives.",
+          sent: "OHOL Stats: sent N lives to the charts tab.",
+          failed: "OHOL Stats: could not read the lives list. The site layout may have changed." },
+  },
+  zh: {
+    title: "一小时人生 游戏统计",
+    intro: "根据 OHOLCurse 上的生命记录，画出一个玩家的《One Hour One Life》游戏统计图。所有计算都在你的浏览器里完成，不会上传任何数据。",
+    loadFile: "读取文件",
+    dropHtml: '<strong>把 CSV 或 Excel 文件拖到这里</strong>，或者点击选择文件。<br><span class="note">可以用 R 或 Python 脚本导出的文件，也可以用任何带 Age 和 Died 两列的表格。</span>',
+    sampleBtn: "显示示例玩家", saveBtn: "保存统计图", csvBtn: "保存 CSV",
+    fromOhol: "或者直接从 OHOLCurse 读取",
+    step1: "把这个按钮拖到浏览器的书签栏：",
+    step2: "在 <b>oholcurse.com</b> 上打开任意一个玩家的页面。可以按排行榜名、curse 名或角色名搜索。",
+    step3: "点一下这个书签，会打开一个新标签页，显示这个玩家的统计图。",
+    bmNote: "如果浏览器拦截了新标签页，请允许 oholcurse.com 弹出窗口，然后再点一次书签。",
+    bmTitle: "把我拖到书签栏",
+    tableSummary: "查看全部生命记录",
+    footer: '数据来自 <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>。游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。',
+    player: "玩家", samplePlayer: "示例玩家（虚构数据）",
+    srcSample: "示例数据", srcOhol: "OHOLCurse", srcLast: "上次从 OHOLCurse 读取的数据",
+    showing: (n, src) => `共 ${n} 条生命记录${src ? "，来自" + src : ""}。`,
+    noLives: "没有找到生命记录。文件至少需要 Age 和 Died 两列。",
+    reading: (f) => `正在读取 ${f} ...`,
+    badFile: (e) => `无法读取这个文件。请使用带表头的 .csv 或 .xlsx 文件。（${e}）`,
+    loadFirst: "请先读取生命记录。",
+    saveFail: (e) => `无法保存图片：${e}`,
+    dragHint: "请把 OHOL Stats 按钮拖到书签栏，然后在 oholcurse.com 的玩家页面上点它。",
+    waiting: "正在等待 OHOLCurse 发送数据 ...",
+    noData: "这张图没有数据。",
+    tHours: "游戏总时长", tHoursSub: (d) => `合 ${d} 天`,
+    tLives: "局数", tRange: (a, b) => `${a} 至 ${b}`,
+    t60: "活到 60 岁", t60Sub: (n) => `${n} 局`,
+    tAvg: "平均寿命", tAvgSub: "死亡时的年龄",
+    cHour: "一天中的时段", cHourSub: "每个小时开始的局数",
+    cHourTip: (h, n, p) => `${h}:00 至 ${h}:59  ${n} 局（${p}%）`,
+    cWeek: "星期几", cWeekSub: "每个星期几开始的局数",
+    cWeekTip: (d, n, p) => `${d}：${n} 局（${p}%）`,
+    cMonth: "每月局数", cMonthSub: "从第一局到本月",
+    cMonthTip: (m, n) => `${m}：${n} 局`,
+    cAge: "死亡年龄", cAgeSub: "平滑后的分布，0 到 60 岁",
+    cAgeTip: (a, b, n, p) => `${a} 至 ${b} 岁：${n} 局（${p}%）`,
+    cCause: "死因", cCauseSub: "前十名，各种野猪合并计算",
+    cSex: "角色性别", cSexSub: "占全部局数的比例",
+    cFirst: "名字", cFirstSub: "前十名，不含 EVE",
+    cLast: "姓氏", cLastSub: "前十名",
+    cDaily: "每天游戏时长", cDailySub: "每根柱子代表一天",
+    dailyPeak: (h, d) => `${d}：${h} 小时`, dailyTip: (wd, d, h) => `${d} ${wd}：${h} 小时`,
+    lives: "局",
+    sex: { female: "女", male: "男", unknown: "未知" },
+    days: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
+    daysShort: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+    monthAxis: (y, m) => `${String(y).slice(2)}年${m}月`,
+    cause: (c) => ({ oldAge: "老死", hunger: "饿死", killer: "被玩家杀死", Boar: "野猪", Wolf: "狼",
+      "Semi-tame Wolf": "半驯化的狼", Yellow_Fever: "黄热病", Rattle_Snake: "响尾蛇", Mosquito_Swarm: "蚊群",
+      Shot_Grizzly_Bear: "中枪的灰熊", Hungry_Grizzly_Bear: "饥饿的灰熊", Sleepy_Grizzly_Bear: "熟睡的灰熊",
+      Grizzly_Bear: "灰熊", rocket_ride_completed: "乘火箭离开", unknown: "未知" }[c] || c.replace(/_/g, " ")),
+    cols: ["日期", "名字", "姓氏", "Life ID", "年龄", "性别", "死因", "出生", "死亡"],
+    exportTitle: (p) => (p ? `一小时人生 游戏统计：${p}` : "一小时人生 游戏统计"),
+    bm: { notPlayer: "OHOL Stats：请先在 oholcurse.com 上打开一个玩家页面，再点一次书签。",
+          blocked: "OHOL Stats：新标签页被拦截了。请允许 oholcurse.com 弹出窗口，然后再点一次。",
+          reading: "OHOL Stats：正在读取生命记录 ...", read: "OHOL Stats：读取了 N 条记录。",
+          sent: "OHOL Stats：已把 N 条记录发送到统计页面。",
+          failed: "OHOL Stats：无法读取生命记录，网站结构可能改了。" },
+  },
+};
+let LANG = "en";
+try { LANG = localStorage.getItem("ohol-lang") || ""; } catch (_) {}
+if (!I18N[LANG]) LANG = /^zh/i.test(navigator.language || "") ? "zh" : "en";
+function tr(k, ...a) {
+  const v = I18N[LANG][k] !== undefined ? I18N[LANG][k] : I18N.en[k];
+  return typeof v === "function" ? v(...a) : v;
+}
+
 const SVGNS = "http://www.w3.org/2000/svg";
 
 let LIVES = [];
 let PLAYER = "";
+let LAST = { player: "", source: "" };
 
 // ---------- Small helpers ----------
 const pad = (n) => String(n).padStart(2, "0");
@@ -285,23 +426,29 @@ function livesFromBookmarklet(rows, utc) {
 }
 
 // ---------- Loading ----------
+// player and source can be plain text, or { key } for text that follows the language
 function load(lives, player, source) {
-  if (!lives.length) { setStatus("No lives found. The file needs at least an Age column and a Died column.", true); return; }
+  if (!lives.length) { setStatus(tr("noLives"), true); return; }
   lives.sort((a, b) => b.died - a.died);
   LIVES = lives;
-  PLAYER = player || "";
+  LAST = { player, source };
+  showLoaded();
+  renderAll();
+}
+const txt = (v) => (v && typeof v === "object" ? tr(v.key) : v || "");
+function showLoaded() {
+  PLAYER = txt(LAST.player);
   $("playerTag").innerHTML = "";
   if (PLAYER) {
     const b = document.createElement("b"); b.textContent = PLAYER;
-    $("playerTag").append("Player ", b);
+    $("playerTag").append(tr("player") + " ", b);
   }
-  setStatus(`Showing ${fmt(lives.length)} lives${source ? " from " + source : ""}.`);
-  renderAll();
+  setStatus(tr("showing", fmt(LIVES.length), txt(LAST.source)));
 }
 
 async function readFile(file) {
   try {
-    setStatus("Reading " + file.name + " ...");
+    setStatus(tr("reading", file.name));
     let wb;
     if (/\.csv$/i.test(file.name)) wb = XLSX.read(await file.text(), { type: "string", raw: true });
     else wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
@@ -310,7 +457,7 @@ async function readFile(file) {
     const guess = file.name.replace(/\.[^.]+$/, "").replace(/^OHOL_lives_/, "");
     load(livesFromObjects(objs), guess, file.name);
   } catch (e) {
-    setStatus("Could not read that file. Use a .csv or .xlsx file with a header row. (" + e.message + ")", true);
+    setStatus(tr("badFile", e.message), true);
   }
 }
 
@@ -410,7 +557,7 @@ function columns(labels, values, { tipFn, labelStride = 1, labelFn = (l) => l, v
   return svg;
 }
 
-function rankedBars(entries, { tipFn } = {}) {
+function rankedBars(entries, { tipFn, labelFn = (l) => l } = {}) {
   entries = entries.slice(0, 10);
   if (!entries.length) return null;
   const rowH = 26, w = 600, labelW = 170, m = { t: 6, r: 44, b: 6 };
@@ -419,11 +566,11 @@ function rankedBars(entries, { tipFn } = {}) {
   const x = (v) => labelW + (w - labelW - m.r) * (v / max);
   entries.forEach(([label, v], i) => {
     const yy = m.t + i * rowH, bh = Math.min(18, rowH - 6), by = yy + (rowH - bh) / 2;
-    const shown = label.length > 24 ? label.slice(0, 23) + "…" : label;
-    text(svg, labelW - 10, yy + rowH / 2 + 4, shown.replace(/_/g, " "), { anchor: "end", fill: C.ink2, size: 12 });
+    const disp = labelFn(label), shown = disp.length > 24 ? disp.slice(0, 23) + "\u2026" : disp;
+    text(svg, labelW - 10, yy + rowH / 2 + 4, shown, { anchor: "end", fill: C.ink2, size: 12 });
     el("path", { d: barPath(labelW, by, Math.max(x(v) - labelW, 2), bh), fill: C.s1 }, svg);
     text(svg, x(v) + 6, yy + rowH / 2 + 4, fmt(v), { anchor: "start", fill: C.ink, size: 12 });
-    hit(svg, 0, yy, w, rowH, tipFn ? tipFn(label, v) : `${label.replace(/_/g, " ")}: ${fmt(v)}`);
+    hit(svg, 0, yy, w, rowH, tipFn ? tipFn(label, v) : `${disp}: ${fmt(v)}`);
   });
   return svg;
 }
@@ -438,7 +585,7 @@ function lineChart(labels, values, { labelFn, tipFn } = {}) {
   el("path", { d: "M" + pts.map((p) => p.join(",")).join("L"), fill: "none", stroke: C.s1, "stroke-width": 2,
                "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
   const maxI = values.indexOf(Math.max(...values));
-  const stride = Math.max(1, Math.ceil(n / 8));
+  const stride = Math.max(1, Math.ceil(n / 7));
   values.forEach((v, i) => {
     if (i === maxI || i === n - 1) {
       el("circle", { cx: pts[i][0], cy: pts[i][1], r: 4.5, fill: C.s1, stroke: C.surface, "stroke-width": 2 }, svg);
@@ -472,10 +619,11 @@ function density(ages) {
   const bins = Array(6).fill(0);
   ages.forEach((a) => bins[Math.min(5, Math.floor(a / 10))]++);
   bins.forEach((c, i) => hit(svg, x(i * 10), m.t, x(10) - x(0), h - m.t - m.b,
-    `Age ${i * 10} to ${i === 5 ? 60 : i * 10 + 10}: ${fmt(c)} lives (${fmt((100 * c) / n, 1)}%)`));
+    tr("cAgeTip", i * 10, i === 5 ? 60 : i * 10 + 10, fmt(c), fmt((100 * c) / n, 1))));
   return svg;
 }
 
+const sexName = (s) => (tr("sex")[s] || s.charAt(0).toUpperCase() + s.slice(1));
 function donut(entries) {
   const w = 600, h = 230, svg = svgRoot(w, h), cx = 170, cy = 115, R = 92, r = 58;
   const total = entries.reduce((s, e) => s + e[1], 0);
@@ -489,15 +637,15 @@ function donut(entries) {
       ? `M${cx + R},${cy}A${R},${R} 0 1 1 ${cx - R},${cy}A${R},${R} 0 1 1 ${cx + R},${cy}ZM${cx + r},${cy}A${r},${r} 0 1 0 ${cx - r},${cy}A${r},${r} 0 1 0 ${cx + r},${cy}Z`
       : `M${x0},${y0}A${R},${R} 0 ${large} 1 ${x1},${y1}L${x2},${y2}A${r},${r} 0 ${large} 0 ${x3},${y3}Z`;
     el("path", { d, fill: color[label] || C.s3, stroke: C.surface, "stroke-width": 2, "fill-rule": "evenodd",
-                 "data-tip": `${label}: ${fmt(v)} (${fmt((100 * v) / total, 1)}%)` }, svg);
+                 "data-tip": `${sexName(label)}: ${fmt(v)} (${fmt((100 * v) / total, 1)}%)` }, svg);
     a0 = a1;
   });
   text(svg, cx, cy - 2, fmt(total), { fill: C.ink, size: 22, weight: 600 });
-  text(svg, cx, cy + 18, "lives", { fill: C.ink3, size: 12 });
+  text(svg, cx, cy + 18, tr("lives"), { fill: C.ink3, size: 12 });
   entries.forEach(([label, v], i) => {
     const yy = 80 + i * 44;
     el("rect", { x: 320, y: yy - 11, width: 12, height: 12, rx: 3, fill: color[label] || C.s3 }, svg);
-    text(svg, 342, yy, label.charAt(0).toUpperCase() + label.slice(1), { anchor: "start", fill: C.ink2, size: 14 });
+    text(svg, 342, yy, sexName(label), { anchor: "start", fill: C.ink2, size: 14 });
     text(svg, 342, yy + 20, `${fmt((100 * v) / total, 1)}%  ·  ${fmt(v)}`, { anchor: "start", fill: C.ink, size: 14, weight: 600 });
   });
   return svg;
@@ -514,14 +662,14 @@ function dailyChart(days, hours) {
     el("path", { d: bw >= 6 ? colPath(x, y(v), bw, y(0) - y(v), 2) : `M${x},${y(0)}V${y(v)}h${bw}V${y(0)}Z`, fill: C.s1 }, svg);
   });
   const xm = m.l + band * maxI + band / 2;
-  text(svg, Math.min(Math.max(xm, m.l + 60), w - 60), y(hours[maxI]) - 6, `${fmt(hours[maxI], 1)} h on ${days[maxI]}`, { fill: C.ink, weight: 600 });
+  text(svg, Math.min(Math.max(xm, m.l + 80), w - 80), y(hours[maxI]) - 6, tr("dailyPeak", fmt(hours[maxI], 1), days[maxI]), { fill: C.ink, weight: 600 });
   // month ticks
   const monthIdx = days.map((d, i) => (d.endsWith("-01") || i === 0 ? i : -1)).filter((i) => i >= 0);
   const stride = Math.max(1, Math.ceil(monthIdx.length / 12));
   monthIdx.forEach((i, k) => {
     if (k % stride || m.l + band * i > w - m.r - 44) return;
     const [yy, mm] = days[i].split("-");
-    text(svg, m.l + band * i, h - 8, `${MONTHS[+mm - 1]} ${yy.slice(2)}`, { anchor: "start", fill: C.ink3 });
+    text(svg, m.l + band * i, h - 8, tr("monthAxis", +yy, +mm), { anchor: "start", fill: C.ink3 });
   });
   const overlay = el("rect", { x: m.l, y: m.t, width: w - m.l - m.r, height: h - m.t - m.b, fill: "transparent", "data-daily": 1 }, svg);
   overlay.__days = days; overlay.__hours = hours; overlay.__band = band; overlay.__left = m.l; overlay.__w = w;
@@ -538,7 +686,7 @@ function card(title, sub, svg, { wide = false, legend = null } = {}) {
     svg.setAttribute("aria-label", title);
     c.appendChild(svg);
   } else {
-    const e = document.createElement("div"); e.className = "empty"; e.textContent = "No data for this chart."; c.appendChild(e);
+    const e = document.createElement("div"); e.className = "empty"; e.textContent = tr("noData"); c.appendChild(e);
   }
   if (legend) c.appendChild(legend);
   c.__svg = svg; c.__title = title; c.__sub = sub;
@@ -558,10 +706,10 @@ function renderTiles(L) {
   const first = L.reduce((a, l) => (l.born < a ? l.born : a), L[0].born);
   const last = L.reduce((a, l) => (l.died > a ? l.died : a), L[0].died);
   const tiles = [
-    ["Hours played", fmt(hours, 1), `${fmt(hours / 24, 1)} days`],
-    ["Lives", fmt(L.length), `${ymd(first)} to ${ymd(last)}`],
-    ["Lived to 60", `${fmt((100 * full) / L.length, 1)}%`, `${fmt(full)} lives`],
-    ["Average age", fmt(avg, 1), "years at death"],
+    [tr("tHours"), fmt(hours, 1), tr("tHoursSub", fmt(hours / 24, 1))],
+    [tr("tLives"), fmt(L.length), tr("tRange", ymd(first), ymd(last))],
+    [tr("t60"), `${fmt((100 * full) / L.length, 1)}%`, tr("t60Sub", fmt(full))],
+    [tr("tAvg"), fmt(avg, 1), tr("tAvgSub")],
   ];
   const box = $("tiles"); box.innerHTML = "";
   for (const [k, v, s] of tiles) {
@@ -574,12 +722,13 @@ function renderTiles(L) {
 }
 
 function renderTable(L) {
-  const cols = [["Date", (l) => ymd(l.born)], ["Name", (l) => l.name || ""], ["Surname", (l) => l.surname || ""],
-    ["Life ID", (l) => l.lifeId, "num"], ["Age", (l) => fmt(l.age, 2), "num"], ["Sex", (l) => l.sex],
-    ["Died to", (l) => l.diedTo], ["Born", (l) => hms(l.born), "num"], ["Died", (l) => `${ymd(l.died)} ${hms(l.died)}`, "num"]];
+  const H = tr("cols");
+  const cols = [[H[0], (l) => ymd(l.born)], [H[1], (l) => l.name || ""], [H[2], (l) => l.surname || ""],
+    [H[3], (l) => l.lifeId, "num"], [H[4], (l) => fmt(l.age, 2), "num"], [H[5], (l) => sexName(l.sex)],
+    [H[6], (l) => tr("cause", l.diedTo)], [H[7], (l) => hms(l.born), "num"], [H[8], (l) => `${ymd(l.died)} ${hms(l.died)}`, "num"]];
   const t = document.createElement("table");
-  const tr = t.createTHead().insertRow();
-  for (const [h] of cols) { const th = document.createElement("th"); th.textContent = h; tr.appendChild(th); }
+  const headRow = t.createTHead().insertRow();
+  for (const [h] of cols) { const th = document.createElement("th"); th.textContent = h; headRow.appendChild(th); }
   const tb = t.createTBody();
   for (const l of L) {
     const r = tb.insertRow();
@@ -597,32 +746,32 @@ function renderAll() {
 
   const hours = Array(24).fill(0); L.forEach((l) => hours[l.born.getHours()]++);
   const hLabels = hours.map((_, i) => pad(i));
-  box.appendChild(card("Time of day", "Lives started in each hour", columns(hLabels, hours, {
-    labelStride: 3, tipFn: (i) => `${pad(i)}:00 to ${pad(i)}:59  ${fmt(hours[i])} lives (${fmt((100 * hours[i]) / L.length, 1)}%)` })));
+  box.appendChild(card(tr("cHour"), tr("cHourSub"), columns(hLabels, hours, {
+    labelStride: 3, tipFn: (i) => tr("cHourTip", pad(i), fmt(hours[i]), fmt((100 * hours[i]) / L.length, 1)) })));
 
   const week = Array(7).fill(0); L.forEach((l) => week[(l.born.getDay() + 6) % 7]++);
-  box.appendChild(card("Day of the week", "Lives started on each weekday", columns(WEEKDAYS, week, {
-    valueLabels: "all", labelFn: (l) => l.slice(0, 3), tipFn: (i) => `${WEEKDAYS[i]}: ${fmt(week[i])} lives (${fmt((100 * week[i]) / L.length, 1)}%)` })));
+  box.appendChild(card(tr("cWeek"), tr("cWeekSub"), columns(tr("days"), week, {
+    valueLabels: "all", labelFn: (l, i) => tr("daysShort")[i], tipFn: (i) => tr("cWeekTip", tr("days")[i], fmt(week[i]), fmt((100 * week[i]) / L.length, 1)) })));
 
   const firstBorn = L.reduce((a, l) => (l.born < a ? l.born : a), L[0].born);
   const months = [];
   for (let d = new Date(firstBorn.getFullYear(), firstBorn.getMonth(), 1), now = new Date(); d <= now; d.setMonth(d.getMonth() + 1)) months.push(ym(d));
   const mCount = new Map(months.map((m) => [m, 0])); L.forEach((l) => { const k = ym(l.born); if (mCount.has(k)) mCount.set(k, mCount.get(k) + 1); });
   const mVals = months.map((m) => mCount.get(m));
-  const mLabel = (s) => { const [y, m] = s.split("-"); return `${MONTHS[+m - 1]} ${y.slice(2)}`; };
-  box.appendChild(card("Lives per month", "From your first life to this month", lineChart(months, mVals, {
-    labelFn: mLabel, tipFn: (i) => `${mLabel(months[i])}: ${fmt(mVals[i])} lives` })));
+  const mLabel = (s) => { const [y, m] = s.split("-"); return tr("monthAxis", +y, +m); };
+  box.appendChild(card(tr("cMonth"), tr("cMonthSub"), lineChart(months, mVals, {
+    labelFn: mLabel, tipFn: (i) => tr("cMonthTip", mLabel(months[i]), fmt(mVals[i])) })));
 
   const ages = L.map((l) => l.age).filter((a) => a <= 60);
-  box.appendChild(card("Age at death", "Smoothed distribution, ages 0 to 60", ages.length > 1 ? density(ages) : null));
+  box.appendChild(card(tr("cAge"), tr("cAgeSub"), ages.length > 1 ? density(ages) : null));
 
   const merged = (c) => (/boar/i.test(c) ? "Boar" : c);
-  box.appendChild(card("Causes of death", "Top 10. All boars are grouped together", rankedBars(countBy(L, (l) => merged(l.diedTo)))));
+  box.appendChild(card(tr("cCause"), tr("cCauseSub"), rankedBars(countBy(L, (l) => merged(l.diedTo)), { labelFn: (c) => tr("cause", c) })));
 
-  box.appendChild(card("Character sex", "Share of all lives", donut(countBy(L, (l) => l.sex))));
+  box.appendChild(card(tr("cSex"), tr("cSexSub"), donut(countBy(L, (l) => l.sex))));
 
-  box.appendChild(card("First names", "Top 10, not counting EVE", rankedBars(countBy(L, (l) => (l.name && l.name !== "EVE" ? l.name : null)))));
-  box.appendChild(card("Family names", "Top 10 surnames", rankedBars(countBy(L, (l) => l.surname))));
+  box.appendChild(card(tr("cFirst"), tr("cFirstSub"), rankedBars(countBy(L, (l) => (l.name && l.name !== "EVE" ? l.name : null)))));
+  box.appendChild(card(tr("cLast"), tr("cLastSub"), rankedBars(countBy(L, (l) => l.surname))));
 
   const dayMap = new Map();
   L.forEach((l) => { if (l.born <= new Date()) { const k = ymd(l.born); dayMap.set(k, (dayMap.get(k) || 0) + l.age / 60); } });
@@ -632,7 +781,7 @@ function renderAll() {
     const [y0, m0, d0] = keys[0].split("-").map(Number), [y1, m1, d1] = keys[keys.length - 1].split("-").map(Number);
     for (let d = new Date(y0, m0 - 1, d0), end = new Date(y1, m1 - 1, d1); d <= end; d.setDate(d.getDate() + 1)) days.push(ymd(d));
   }
-  box.appendChild(card("Hours played per day", "Each bar is one calendar day", days.length ? dailyChart(days, days.map((d) => dayMap.get(d) || 0)) : null, { wide: true }));
+  box.appendChild(card(tr("cDaily"), tr("cDailySub"), days.length ? dailyChart(days, days.map((d) => dayMap.get(d) || 0)) : null, { wide: true }));
 
   renderTable(L);
 }
@@ -648,7 +797,7 @@ document.addEventListener("pointermove", (e) => {
     const i = Math.floor(((e.clientX - r.left) * scale - t.__left) / t.__band);
     if (i >= 0 && i < t.__days.length) {
       const d = t.__days[i], [yy, mm, dd] = d.split("-").map(Number);
-      return showTip(e, `${WEEKDAYS[(new Date(yy, mm - 1, dd).getDay() + 6) % 7].slice(0, 3)} ${d}: ${fmt(t.__hours[i], 2)} h`);
+      return showTip(e, tr("dailyTip", tr("daysShort")[(new Date(yy, mm - 1, dd).getDay() + 6) % 7], d, fmt(t.__hours[i], 2)));
     }
   }
   tip.hidden = true;
@@ -665,7 +814,7 @@ function download(blob, name) {
 const fileBase = () => (PLAYER || "player").replace(/[^A-Za-z0-9]+/g, "") || "player";
 
 async function saveImage() {
-  if (!LIVES.length) return setStatus("Load some lives first.", true);
+  if (!LIVES.length) return setStatus(tr("loadFirst"), true);
   const cards = [...$("charts").children].filter((c) => c.__svg);
   const S = 2, colW = 640, gap = 20, padX = 30, head = 110, W = padX * 2 + colW * 2 + gap;
   const items = [];
@@ -683,7 +832,7 @@ async function saveImage() {
   const g = cv.getContext("2d"); g.scale(S, S);
   const cs = getComputedStyle(document.documentElement), tok = (n) => cs.getPropertyValue(n).trim();
   g.fillStyle = tok("--bg"); g.fillRect(0, 0, W, H);
-  g.fillStyle = tok("--ink"); g.font = `700 30px ${tok("--font-display")}`; g.fillText(PLAYER ? `OHOL Life Stats: ${PLAYER}` : "OHOL Life Stats", padX, 50);
+  g.fillStyle = tok("--ink"); g.font = `700 30px ${tok("--font-display")}`; g.fillText(tr("exportTitle", PLAYER), padX, 50);
   g.font = `15px ${FONT}`; g.fillStyle = tok("--ink-2");
   g.fillText([...$("tiles").children].map((t) => `${t.children[0].textContent} ${t.children[1].textContent}`).join("     "), padX, 82);
   for (const it of items) {
@@ -703,7 +852,7 @@ async function saveImage() {
 }
 
 function saveCsv() {
-  if (!LIVES.length) return setStatus("Load some lives first.", true);
+  if (!LIVES.length) return setStatus(tr("loadFirst"), true);
   const q = (s) => (/[",\n]/.test(s) ? `"${String(s).replace(/"/g, '""')}"` : s);
   const lines = [["Date", "Month", "Day", "Name", "Surname", "Life ID", "Age", "Sex", "Location", "Died to", "Born", "Died"].join(",")];
   for (const l of LIVES) {
@@ -722,17 +871,17 @@ function appUrl() {
 }
 
 // Runs on oholcurse.com, where reading the site is allowed. It sends the rows to this page.
-function bookmarkletSource(APP) {
-  return `(async()=>{const APP=${JSON.stringify(APP)};
+function bookmarkletSource(APP, M) {
+  return `(async()=>{const APP=${JSON.stringify(APP)};const M=${JSON.stringify(M)};
 const box=document.createElement('div');box.style.cssText='position:fixed;z-index:99999;top:16px;right:16px;max-width:360px;background:#1d2620;color:#f4f6f1;font:14px/1.4 system-ui,sans-serif;padding:12px 14px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.3)';
 const say=(t)=>{box.textContent=t;};document.body.appendChild(box);setTimeout(()=>box.remove(),20000);
 const m=location.pathname.match(/[0-9a-f]{40}/i);
-if(location.hostname!=='oholcurse.com'||!m){say('OHOL Stats: open a player page on oholcurse.com first, then click the bookmark again.');return;}
+if(location.hostname!=='oholcurse.com'||!m){say(M.notPlayer);return;}
 const w=window.open(APP+'#from-oholcurse','ohol_stats');
-if(!w){say('OHOL Stats: the new tab was blocked. Allow pop ups for oholcurse.com and click again.');return;}
-say('OHOL Stats: reading lives...');
+if(!w){say(M.blocked);return;}
+say(M.reading);
 let ready=false,payload=null;const target=new URL(APP).origin;
-const send=()=>{if(ready&&payload){w.postMessage(payload,target);say('OHOL Stats: sent '+payload.rows.length+' lives to the charts tab.');}};
+const send=()=>{if(ready&&payload){w.postMessage(payload,target);say(M.sent.replace('N',payload.rows.length));}};
 addEventListener('message',(e)=>{if(e.source===w&&e.data&&e.data.type==='ohol-ready'){ready=true;send();}});
 try{const html=await fetch('/player/lives/'+m[0]).then(r=>r.text());
 const d=new DOMParser().parseFromString(html,'text/html');
@@ -742,23 +891,39 @@ const r=await fetch('/livewire/update',{method:'POST',headers:{'Content-Type':'a
 const t=new DOMParser().parseFromString((await r.json()).components[0].effects.html,'text/html');
 const rows=[...t.querySelectorAll('table tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent.replace(/\\s+/g,' ').trim()));
 payload={type:'ohol-lives',version:1,player:d.title.split('Lives for ').pop().trim(),utc:!d.querySelector('a[href$="/logout"]'),rows};
-say('OHOL Stats: read '+rows.length+' lives.');send();
-}catch(err){say('OHOL Stats: could not read the lives list ('+err.message+'). The site layout may have changed.');}})();`;
+say(M.read.replace('N',rows.length));send();
+}catch(err){say(M.failed+' ('+err.message+')');}})();`;
 }
-$("bmLink").href = "javascript:" + encodeURIComponent(bookmarkletSource(appUrl()));
-$("bmLink").addEventListener("click", (e) => { e.preventDefault(); setStatus("Drag the OHOL Stats button to your bookmarks bar, then click it on an oholcurse.com player page."); });
+$("bmLink").addEventListener("click", (e) => { e.preventDefault(); setStatus(tr("dragHint")); });
 
 window.addEventListener("message", (e) => {
   if (e.origin !== OHOL_ORIGIN) return;
   const d = e.data;
   if (!d || d.type !== "ohol-lives" || !Array.isArray(d.rows)) return;
-  load(livesFromBookmarklet(d.rows, !!d.utc), String(d.player || "").slice(0, 80), "OHOLCurse");
+  load(livesFromBookmarklet(d.rows, !!d.utc), String(d.player || "").slice(0, 80), { key: "srcOhol" });
   try { localStorage.setItem("ohol-last", JSON.stringify(d)); } catch (_) {}
 });
 if (location.hash === "#from-oholcurse" && window.opener) {
-  setStatus("Waiting for OHOLCurse to send the lives ...");
+  setStatus(tr("waiting"));
   try { window.opener.postMessage({ type: "ohol-ready" }, OHOL_ORIGIN); } catch (_) {}
 }
+
+function applyLang() {
+  document.documentElement.lang = LANG === "zh" ? "zh-Hans" : "en";
+  document.title = tr("title");
+  document.querySelectorAll("[data-i18n]").forEach((n) => { n.textContent = tr(n.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach((n) => { n.innerHTML = tr(n.dataset.i18nHtml); });
+  document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
+  $("bmLink").title = tr("bmTitle");
+  $("bmLink").href = "javascript:" + encodeURIComponent(bookmarkletSource(appUrl(), tr("bm")));
+  if (LIVES.length) { showLoaded(); renderAll(); }
+}
+document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => {
+  LANG = b.dataset.lang;
+  try { localStorage.setItem("ohol-lang", LANG); } catch (_) {}
+  applyLang();
+}));
+applyLang();
 
 // ---------- Wiring ----------
 const drop = $("drop"), input = $("fileInput");
@@ -767,8 +932,8 @@ drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " "
 ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
 ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
 drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) readFile(f); });
-$("sampleBtn").addEventListener("click", () => load(samplePlayer(), "Sample player (made up data)", "the sample"));
-$("saveBtn").addEventListener("click", () => saveImage().catch((e) => setStatus("Could not save the image: " + e.message, true)));
+$("sampleBtn").addEventListener("click", () => load(samplePlayer(), { key: "samplePlayer" }, { key: "srcSample" }));
+$("saveBtn").addEventListener("click", () => saveImage().catch((e) => setStatus(tr("saveFail", e.message), true)));
 $("csvBtn").addEventListener("click", saveCsv);
 
 const rerender = () => LIVES.length && renderAll();
@@ -780,10 +945,10 @@ let started = false;
 if (location.hash !== "#from-oholcurse") {
   try {
     const last = JSON.parse(localStorage.getItem("ohol-last") || "null");
-    if (last && Array.isArray(last.rows)) { load(livesFromBookmarklet(last.rows, !!last.utc), last.player, "your last OHOLCurse visit"); started = true; }
+    if (last && Array.isArray(last.rows)) { load(livesFromBookmarklet(last.rows, !!last.utc), last.player, { key: "srcLast" }); started = true; }
   } catch (_) {}
 }
-if (!started && location.hash !== "#from-oholcurse") load(samplePlayer(), "Sample player (made up data)", "the sample");
+if (!started && location.hash !== "#from-oholcurse") load(samplePlayer(), { key: "samplePlayer" }, { key: "srcSample" });
 })();
 </script>
 </body>
