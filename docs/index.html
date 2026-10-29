@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Charts of one player's One Hour One Life history from OHOLCurse.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NEVK03VJ8F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NEVK03VJ8F');
+</script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <title>OHOL Life Stats</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -104,11 +112,28 @@ button:focus-visible, .btn:focus-visible, .drop:focus-visible { outline: 2px sol
 .note { font-size: 13px; color: var(--ink-2); margin: 0; }
 ol.steps { margin: 0; padding-left: 20px; font-size: 14px; color: var(--ink-2); display: grid; gap: 4px; }
 ol.steps b { color: var(--ink); font-weight: 600; }
+details.help { border-top: 1px solid var(--line); padding-top: 8px; }
+details.help > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); }
+details.help[open] > summary { margin-bottom: 8px; }
+.help-body { display: grid; gap: 10px; font-size: 14px; color: var(--ink-2); }
+.help-body h4 { margin: 0 0 2px; font-size: 13px; color: var(--ink); font-weight: 600; }
+.help-body p, .help-body ol { margin: 0; }
+.help-body ol { padding-left: 20px; display: grid; gap: 2px; }
+.help-body kbd { font-family: var(--font-data); font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--bg); color: var(--ink); white-space: nowrap; }
+.help-body b { color: var(--ink); }
+.copy-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#bmCode { width: 100%; font-family: var(--font-data); font-size: 12px; min-height: 70px; border: 1px solid var(--line); border-radius: 6px; padding: 6px; background: var(--bg); color: var(--ink); }
 .status { font-size: 14px; min-height: 1.5em; margin: 0; }
 .status.err { color: #c2412d; }
 :root[data-theme="dark"] .status.err { color: #ef7a62; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .status.err { color: #ef7a62; } }
 
+.range-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: -10px; }
+.range-row .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; }
+.range { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.range button { border: 0; border-radius: 0; border-right: 1px solid var(--line); padding: 6px 12px; font-size: 13px; background: var(--surface); color: var(--ink-2); }
+.range button:last-child { border-right: 0; }
+.range button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .tile { padding: 14px 16px; border-left: 3px solid var(--wheat); background: var(--surface); border-radius: 0 8px 8px 0; }
 .tile .k { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-2); }
@@ -140,6 +165,7 @@ td.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; text
   transform: translate(-50%, calc(-100% - 10px));
 }
 footer { font-size: 13px; color: var(--ink-3); }
+.visits { font-size: 13px; color: var(--ink-3); margin: -12px 0 0; font-family: var(--font-data); }
 footer a { color: var(--ink-2); }
 
 @media (max-width: 820px) {
@@ -191,9 +217,22 @@ footer a { color: var(--ink-2); }
         <li data-i18n="step3">Click the bookmark. A new tab opens here with that player's charts.</li>
       </ol>
       <p class="note" id="bmNote" data-i18n="bmNote">If your browser blocks the new tab, allow pop ups for oholcurse.com and click again.</p>
+      <details class="help" id="bmHelp">
+        <summary data-i18n="helpSummary">How do I add the bookmark?</summary>
+        <div class="help-body" id="helpBody"></div>
+        <div class="copy-row" style="margin-top:10px">
+          <button type="button" id="copyBm" data-i18n="copyBtn">Copy bookmark code</button>
+          <span class="note" id="copyMsg" role="status"></span>
+        </div>
+        <textarea id="bmCode" readonly hidden aria-label="Bookmark code"></textarea>
+      </details>
     </section>
   </div>
 
+  <div class="range-row">
+    <span class="lbl" data-i18n="rangeLabel">Time range</span>
+    <div class="range" role="group" id="rangeBar"></div>
+  </div>
   <div class="tiles" id="tiles"></div>
   <div class="grid" id="charts"></div>
 
@@ -203,6 +242,7 @@ footer a { color: var(--ink-2); }
   </details>
 
   <footer data-i18n-html="footer">Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.</footer>
+  <p class="visits" id="visits" hidden><span data-i18n="visits">Page views</span> <span id="busuanzi_value_page_pv"></span></p>
 </div>
 <div class="tip" id="tip" hidden></div>
 
@@ -231,6 +271,38 @@ const I18N = {
     bmNote: "If your browser blocks the new tab, allow pop ups for oholcurse.com and click again.",
     bmTitle: "Drag me to your bookmarks bar",
     tableSummary: "All lives as a table",
+    rangeLabel: "Time range",
+    ranges: { "1m": "Last month", "3m": "Last 3 months", "6m": "Last 6 months", "1y": "Last year", all: "All time" },
+    helpSummary: "How do I add the bookmark?",
+    copyBtn: "Copy bookmark code",
+    copied: "Copied. Now paste it as the address of a new bookmark.",
+    copyFail: "Your browser did not allow copying. Select the code below and copy it yourself.",
+    helpHtml: `
+<p>The <b>OHOL Stats</b> button is a bookmarklet: a bookmark that runs a small script instead of opening a page. You add it once, then click it on oholcurse.com.</p>
+<div><h4>Chrome, Edge, Brave, Opera, Vivaldi</h4>
+<ol><li>Show the bookmarks bar: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> on Windows and Linux, <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> on Mac. In Edge it is called the favourites bar.</li>
+<li>Press and hold the <b>OHOL Stats</b> button, drag it onto the bar, then let go.</li>
+<li>If the new tab is blocked, click the blocked pop up icon at the right end of the address bar and choose to always allow pop ups from oholcurse.com.</li></ol></div>
+<div><h4>Firefox</h4>
+<ol><li>Show the bookmarks toolbar: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> on Windows and Linux, <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> on Mac.</li>
+<li>Drag the <b>OHOL Stats</b> button onto the toolbar.</li>
+<li>If a yellow bar says a pop up was blocked, click <b>Options</b> and allow pop ups for oholcurse.com.</li></ol></div>
+<div><h4>Safari on Mac</h4>
+<ol><li>Show the favourites bar: <b>View</b> menu, <b>Show Favourites Bar</b>, or <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>.</li>
+<li>Drag the <b>OHOL Stats</b> button onto the favourites bar.</li>
+<li>If the new tab is blocked: <b>Safari</b> menu, <b>Settings for This Website</b> (or <b>Settings for oholcurse.com</b>), set <b>Pop up Windows</b> to <b>Allow</b>.</li></ol></div>
+<div><h4>iPhone and iPad (Safari)</h4>
+<ol><li>Tap <b>Copy bookmark code</b> below.</li>
+<li>Bookmark this page: tap the share button, then <b>Add Bookmark</b>, then <b>Save</b>.</li>
+<li>Open your bookmarks, tap <b>Edit</b>, tap the new bookmark, rename it <b>OHOL Stats</b>, clear the address and paste the code. Tap <b>Done</b>.</li>
+<li>On an oholcurse.com player page, open your bookmarks and tap <b>OHOL Stats</b>.</li></ol></div>
+<div><h4>Android (Chrome)</h4>
+<ol><li>Tap <b>Copy bookmark code</b> below.</li>
+<li>Bookmark this page with the star in the menu, then tap <b>Edit</b>. Rename it <b>OHOL Stats</b>, replace the address with the code, and save.</li>
+<li>On an oholcurse.com player page, tap the address bar, type <b>OHOL Stats</b> and tap the bookmark in the suggestions. Opening it from the bookmarks list does not run it on Android.</li></ol></div>
+<div><h4>Any other browser</h4>
+<p>Copy the bookmark code, make a new bookmark by hand, and paste the code as its address. Clicking the button on this page does nothing on purpose. It only works from the bookmarks bar while you are on oholcurse.com.</p></div>`,
+    visits: "Page views:",
     footer: 'Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life\'s birth time is its death time minus its age in minutes.',
     player: "Player", samplePlayer: "Sample player (made up data)",
     srcSample: "the sample", srcOhol: "OHOLCurse", srcLast: "your last OHOLCurse visit",
@@ -251,7 +323,7 @@ const I18N = {
     cHourTip: (h, n, p) => `${h}:00 to ${h}:59  ${n} lives (${p}%)`,
     cWeek: "Day of the week", cWeekSub: "Lives started on each weekday",
     cWeekTip: (d, n, p) => `${d}: ${n} lives (${p}%)`,
-    cMonth: "Lives per month", cMonthSub: "From your first life to this month",
+    cMonth: "Lives per month", cMonthSub: "Up to this month",
     cMonthTip: (m, n) => `${m}: ${n} lives`,
     cAge: "Age at death", cAgeSub: "Smoothed distribution, ages 0 to 60",
     cAgeTip: (a, b, n, p) => `Age ${a} to ${b}: ${n} lives (${p}%)`,
@@ -288,6 +360,38 @@ const I18N = {
     bmNote: "如果浏览器拦截了新标签页，请允许 oholcurse.com 弹出窗口，然后再点一次书签。",
     bmTitle: "把我拖到书签栏",
     tableSummary: "查看全部生命记录",
+    rangeLabel: "时间范围",
+    ranges: { "1m": "近 1 个月", "3m": "近 3 个月", "6m": "近 6 个月", "1y": "近 1 年", all: "全部" },
+    helpSummary: "怎么添加书签？",
+    copyBtn: "复制书签代码",
+    copied: "已复制。新建一个书签，把它粘贴到网址那一栏。",
+    copyFail: "浏览器不允许自动复制。请选中下面的代码，自己复制。",
+    helpHtml: `
+<p><b>OHOL Stats</b> 这个按钮是一个"书签小工具"。它和普通书签一样放在书签栏里，但里面存的是一小段程序，不是网址。只要添加一次，以后在 oholcurse.com 上点它就行。</p>
+<div><h4>Chrome、Edge、Brave、Opera、Vivaldi</h4>
+<ol><li>先显示书签栏：Windows 和 Linux 按 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>，Mac 按 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>。Edge 里叫"收藏夹栏"。</li>
+<li>用鼠标按住 <b>OHOL Stats</b> 按钮，拖到书签栏上再松开。是拖，不是点。</li>
+<li>如果新标签页被拦截，点地址栏右边那个弹出窗口被拦截的小图标，选择始终允许 oholcurse.com 弹出窗口。</li></ol></div>
+<div><h4>Firefox</h4>
+<ol><li>先显示书签工具栏：Windows 和 Linux 按 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>，Mac 按 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>。</li>
+<li>把 <b>OHOL Stats</b> 按钮拖到工具栏上。</li>
+<li>如果页面上方出现黄色提示条，说弹出窗口被拦截，点<b>选项</b>，允许 oholcurse.com 弹出窗口。</li></ol></div>
+<div><h4>Mac 上的 Safari</h4>
+<ol><li>先显示个人收藏栏：菜单栏<b>显示</b>，选<b>显示个人收藏栏</b>，或者按 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>。</li>
+<li>把 <b>OHOL Stats</b> 按钮拖到个人收藏栏上。</li>
+<li>如果新标签页被拦截：菜单栏 <b>Safari</b>，选<b>此网站的设置</b>（有的版本显示为<b>"oholcurse.com"的设置</b>），把<b>弹出式窗口</b>改成<b>允许</b>。</li></ol></div>
+<div><h4>iPhone 和 iPad（Safari）</h4>
+<ol><li>点下面的<b>复制书签代码</b>。</li>
+<li>把当前这个网页加入书签：点分享按钮，选<b>添加书签</b>，再点<b>存储</b>。</li>
+<li>打开书签列表，点<b>编辑</b>，点刚才新建的书签，把名字改成 <b>OHOL Stats</b>，把网址清空，粘贴刚才复制的代码，点<b>完成</b>。</li>
+<li>以后在 oholcurse.com 的玩家页面上，打开书签列表，点 <b>OHOL Stats</b> 就行。</li></ol></div>
+<div><h4>安卓手机（Chrome）</h4>
+<ol><li>点下面的<b>复制书签代码</b>。</li>
+<li>点菜单里的星号把当前网页加入书签，然后点<b>修改</b>。名字改成 <b>OHOL Stats</b>，网址换成刚才复制的代码，保存。</li>
+<li>以后在 oholcurse.com 的玩家页面上，点地址栏，输入 <b>OHOL Stats</b>，在下面的建议里点这个书签。注意在安卓上，从书签列表里直接打开是不会运行的。</li></ol></div>
+<div><h4>其他浏览器</h4>
+<p>点<b>复制书签代码</b>，手动新建一个书签，把代码粘贴到网址那一栏。在这个网页上直接点 OHOL Stats 按钮是没有反应的，这是正常的。它只有在 oholcurse.com 的页面上、从书签栏点击时才会运行。</p></div>`,
+    visits: "本页访问量：",
     footer: '数据来自 <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>。游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。',
     player: "玩家", samplePlayer: "示例玩家（虚构数据）",
     srcSample: "示例数据", srcOhol: "OHOLCurse", srcLast: "上次从 OHOLCurse 读取的数据",
@@ -308,7 +412,7 @@ const I18N = {
     cHourTip: (h, n, p) => `${h}:00 至 ${h}:59  ${n} 局（${p}%）`,
     cWeek: "星期几", cWeekSub: "每个星期几开始的局数",
     cWeekTip: (d, n, p) => `${d}：${n} 局（${p}%）`,
-    cMonth: "每月局数", cMonthSub: "从第一局到本月",
+    cMonth: "每月局数", cMonthSub: "截至本月",
     cMonthTip: (m, n) => `${m}：${n} 局`,
     cAge: "死亡年龄", cAgeSub: "平滑后的分布，0 到 60 岁",
     cAgeTip: (a, b, n, p) => `${a} 至 ${b} 岁：${n} 局（${p}%）`,
@@ -699,16 +803,43 @@ function countBy(arr, fn) {
   return [...m.entries()].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])));
 }
 
-function renderTiles(L) {
+// ---------- Time range ----------
+const RANGES = [["1m", 1], ["3m", 3], ["6m", 6], ["1y", 12], ["all", 0]];
+let RANGE = "all";
+try { const r = localStorage.getItem("ohol-range"); if (RANGES.some((x) => x[0] === r)) RANGE = r; } catch (_) {}
+const today0 = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+// First day shown: the first life for "all time", otherwise the same date N months ago
+function rangeStart() {
+  const months = RANGES.find((x) => x[0] === RANGE)[1];
+  if (!months) {
+    const first = LIVES.reduce((a, l) => (l.born < a ? l.born : a), LIVES[0].born);
+    return new Date(first.getFullYear(), first.getMonth(), first.getDate());
+  }
+  const d = today0(); d.setMonth(d.getMonth() - months); return d;
+}
+const inRange = () => { const s0 = rangeStart(); return LIVES.filter((l) => l.born >= s0); };
+function renderRangeBar() {
+  const bar = $("rangeBar"); bar.innerHTML = "";
+  for (const [key] of RANGES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = tr("ranges")[key]; b.setAttribute("aria-pressed", String(key === RANGE));
+    b.addEventListener("click", () => {
+      RANGE = key;
+      try { localStorage.setItem("ohol-range", key); } catch (_) {}
+      renderAll();
+    });
+    bar.appendChild(b);
+  }
+}
+
+function renderTiles(L, start) {
   const hours = L.reduce((s, l) => s + l.age, 0) / 60;
   const full = L.filter((l) => l.age >= 60).length;
-  const avg = L.reduce((s, l) => s + l.age, 0) / L.length;
-  const first = L.reduce((a, l) => (l.born < a ? l.born : a), L[0].born);
-  const last = L.reduce((a, l) => (l.died > a ? l.died : a), L[0].died);
+  const avg = L.length ? L.reduce((s, l) => s + l.age, 0) / L.length : 0;
   const tiles = [
     [tr("tHours"), fmt(hours, 1), tr("tHoursSub", fmt(hours / 24, 1))],
-    [tr("tLives"), fmt(L.length), tr("tRange", ymd(first), ymd(last))],
-    [tr("t60"), `${fmt((100 * full) / L.length, 1)}%`, tr("t60Sub", fmt(full))],
+    [tr("tLives"), fmt(L.length), tr("tRange", ymd(start), ymd(new Date()))],
+    [tr("t60"), `${fmt(L.length ? (100 * full) / L.length : 0, 1)}%`, tr("t60Sub", fmt(full))],
     [tr("tAvg"), fmt(avg, 1), tr("tAvgSub")],
   ];
   const box = $("tiles"); box.innerHTML = "";
@@ -739,23 +870,25 @@ function renderTable(L) {
 
 function renderAll() {
   C = tokens();
-  const L = LIVES;
-  if (!L.length) return;
-  renderTiles(L);
+  if (!LIVES.length) return;
+  renderRangeBar();
+  const start = rangeStart();
+  const L = inRange();
+  const pct = (n) => fmt(L.length ? (100 * n) / L.length : 0, 1);
+  renderTiles(L, start);
   const box = $("charts"); box.innerHTML = "";
 
   const hours = Array(24).fill(0); L.forEach((l) => hours[l.born.getHours()]++);
   const hLabels = hours.map((_, i) => pad(i));
   box.appendChild(card(tr("cHour"), tr("cHourSub"), columns(hLabels, hours, {
-    labelStride: 3, tipFn: (i) => tr("cHourTip", pad(i), fmt(hours[i]), fmt((100 * hours[i]) / L.length, 1)) })));
+    labelStride: 3, tipFn: (i) => tr("cHourTip", pad(i), fmt(hours[i]), pct(hours[i])) })));
 
   const week = Array(7).fill(0); L.forEach((l) => week[(l.born.getDay() + 6) % 7]++);
   box.appendChild(card(tr("cWeek"), tr("cWeekSub"), columns(tr("days"), week, {
-    valueLabels: "all", labelFn: (l, i) => tr("daysShort")[i], tipFn: (i) => tr("cWeekTip", tr("days")[i], fmt(week[i]), fmt((100 * week[i]) / L.length, 1)) })));
+    valueLabels: "all", labelFn: (l, i) => tr("daysShort")[i], tipFn: (i) => tr("cWeekTip", tr("days")[i], fmt(week[i]), pct(week[i])) })));
 
-  const firstBorn = L.reduce((a, l) => (l.born < a ? l.born : a), L[0].born);
   const months = [];
-  for (let d = new Date(firstBorn.getFullYear(), firstBorn.getMonth(), 1), now = new Date(); d <= now; d.setMonth(d.getMonth() + 1)) months.push(ym(d));
+  for (let d = new Date(start.getFullYear(), start.getMonth(), 1), now = new Date(); d <= now; d.setMonth(d.getMonth() + 1)) months.push(ym(d));
   const mCount = new Map(months.map((m) => [m, 0])); L.forEach((l) => { const k = ym(l.born); if (mCount.has(k)) mCount.set(k, mCount.get(k) + 1); });
   const mVals = months.map((m) => mCount.get(m));
   const mLabel = (s) => { const [y, m] = s.split("-"); return tr("monthAxis", +y, +m); };
@@ -768,19 +901,15 @@ function renderAll() {
   const merged = (c) => (/boar/i.test(c) ? "Boar" : c);
   box.appendChild(card(tr("cCause"), tr("cCauseSub"), rankedBars(countBy(L, (l) => merged(l.diedTo)), { labelFn: (c) => tr("cause", c) })));
 
-  box.appendChild(card(tr("cSex"), tr("cSexSub"), donut(countBy(L, (l) => l.sex))));
+  box.appendChild(card(tr("cSex"), tr("cSexSub"), L.length ? donut(countBy(L, (l) => l.sex)) : null));
 
   box.appendChild(card(tr("cFirst"), tr("cFirstSub"), rankedBars(countBy(L, (l) => (l.name && l.name !== "EVE" ? l.name : null)))));
   box.appendChild(card(tr("cLast"), tr("cLastSub"), rankedBars(countBy(L, (l) => l.surname))));
 
   const dayMap = new Map();
   L.forEach((l) => { if (l.born <= new Date()) { const k = ymd(l.born); dayMap.set(k, (dayMap.get(k) || 0) + l.age / 60); } });
-  const keys = [...dayMap.keys()].sort();
   const days = [];
-  if (keys.length) {
-    const [y0, m0, d0] = keys[0].split("-").map(Number), [y1, m1, d1] = keys[keys.length - 1].split("-").map(Number);
-    for (let d = new Date(y0, m0 - 1, d0), end = new Date(y1, m1 - 1, d1); d <= end; d.setDate(d.getDate() + 1)) days.push(ymd(d));
-  }
+  for (let d = new Date(start), end = today0(); d <= end; d.setDate(d.getDate() + 1)) days.push(ymd(d));
   box.appendChild(card(tr("cDaily"), tr("cDailySub"), days.length ? dailyChart(days, days.map((d) => dayMap.get(d) || 0)) : null, { wide: true }));
 
   renderTable(L);
@@ -832,7 +961,7 @@ async function saveImage() {
   const g = cv.getContext("2d"); g.scale(S, S);
   const cs = getComputedStyle(document.documentElement), tok = (n) => cs.getPropertyValue(n).trim();
   g.fillStyle = tok("--bg"); g.fillRect(0, 0, W, H);
-  g.fillStyle = tok("--ink"); g.font = `700 30px ${tok("--font-display")}`; g.fillText(tr("exportTitle", PLAYER), padX, 50);
+  g.fillStyle = tok("--ink"); g.font = `700 30px ${tok("--font-display")}`; g.fillText(`${tr("exportTitle", PLAYER)}  (${tr("ranges")[RANGE]})`, padX, 50);
   g.font = `15px ${FONT}`; g.fillStyle = tok("--ink-2");
   g.fillText([...$("tiles").children].map((t) => `${t.children[0].textContent} ${t.children[1].textContent}`).join("     "), padX, 82);
   for (const it of items) {
@@ -877,7 +1006,7 @@ const box=document.createElement('div');box.style.cssText='position:fixed;z-inde
 const say=(t)=>{box.textContent=t;};document.body.appendChild(box);setTimeout(()=>box.remove(),20000);
 const m=location.pathname.match(/[0-9a-f]{40}/i);
 if(location.hostname!=='oholcurse.com'||!m){say(M.notPlayer);return;}
-const w=window.open(APP+'#from-oholcurse','ohol_stats');
+const w=window.open(APP+'#from-oholcurse','_blank');
 if(!w){say(M.blocked);return;}
 say(M.reading);
 let ready=false,payload=null;const target=new URL(APP).origin;
@@ -903,6 +1032,14 @@ window.addEventListener("message", (e) => {
   load(livesFromBookmarklet(d.rows, !!d.utc), String(d.player || "").slice(0, 80), { key: "srcOhol" });
   try { localStorage.setItem("ohol-last", JSON.stringify(d)); } catch (_) {}
 });
+// Another tab read a new player: show it here too
+window.addEventListener("storage", (e) => {
+  if (e.key !== "ohol-last" || !e.newValue) return;
+  try {
+    const d = JSON.parse(e.newValue);
+    if (d && Array.isArray(d.rows)) load(livesFromBookmarklet(d.rows, !!d.utc), String(d.player || "").slice(0, 80), { key: "srcOhol" });
+  } catch (_) {}
+});
 if (location.hash === "#from-oholcurse" && window.opener) {
   setStatus(tr("waiting"));
   try { window.opener.postMessage({ type: "ohol-ready" }, OHOL_ORIGIN); } catch (_) {}
@@ -915,6 +1052,8 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-html]").forEach((n) => { n.innerHTML = tr(n.dataset.i18nHtml); });
   document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
   $("bmLink").title = tr("bmTitle");
+  $("helpBody").innerHTML = tr("helpHtml");
+  $("copyMsg").textContent = "";
   $("bmLink").href = "javascript:" + encodeURIComponent(bookmarkletSource(appUrl(), tr("bm")));
   if (LIVES.length) { showLoaded(); renderAll(); }
 }
@@ -924,6 +1063,25 @@ document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("cli
   applyLang();
 }));
 applyLang();
+
+// Copy the bookmark code, for phones and for making the bookmark by hand
+$("copyBm").addEventListener("click", () => {
+  const code = $("bmLink").getAttribute("href");
+  const fallback = () => {
+    const ta = $("bmCode"); ta.value = code; ta.hidden = false; ta.focus(); ta.select();
+    $("copyMsg").textContent = tr("copyFail");
+  };
+  try {
+    navigator.clipboard.writeText(code).then(() => { $("copyMsg").textContent = tr("copied"); }, fallback);
+  } catch (_) { fallback(); }
+});
+
+// ---------- Visit counter (only on the hosted copy) ----------
+(function watchVisits(tries) {
+  const v = $("busuanzi_value_page_pv");
+  if (v && /\d/.test(v.textContent)) { $("visits").hidden = false; return; }
+  if (tries > 0) setTimeout(() => watchVisits(tries - 1), 500);
+})(40);
 
 // ---------- Wiring ----------
 const drop = $("drop"), input = $("fileInput");
