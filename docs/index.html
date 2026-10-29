@@ -13,9 +13,6 @@
 </script>
 <script data-goatcounter="https://ohol-stats.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>OHOL Life Stats</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* Layout: a working tool. Controls band on top, four summary tiles, then a two column grid of chart cards, then the raw table. */
@@ -36,9 +33,9 @@
   --wash: rgba(42, 120, 214, 0.12);
   --tip-bg: #1d2620;
   --tip-ink: #f4f6f1;
-  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-data: ui-monospace, "SF Mono", Menlo, Consolas, "PingFang SC", "Microsoft YaHei", monospace;
   --radius: 10px;
 }
 @media (prefers-color-scheme: dark) {
@@ -447,7 +444,7 @@ const I18N = {
     days: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
     daysShort: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
     monthAxis: (y, m) => `${String(y).slice(2)}年${m}月`,
-    cause: (c) => ({ oldAge: "老死", hunger: "饿死", killer: "他杀", Boar: "野猪", Wolf: "狼",
+    cause: (c) => ({ oldAge: "老死", hunger: "饿死", killer: "被玩家杀死", Boar: "野猪", Wolf: "狼",
       "Semi-tame Wolf": "半驯化的狼", Yellow_Fever: "黄热病", Rattle_Snake: "响尾蛇", Mosquito_Swarm: "蚊群",
       Shot_Grizzly_Bear: "中枪的灰熊", Hungry_Grizzly_Bear: "饥饿的灰熊", Sleepy_Grizzly_Bear: "熟睡的灰熊",
       Grizzly_Bear: "灰熊", rocket_ride_completed: "乘火箭离开", unknown: "未知" }[c] || c.replace(/_/g, " ")),
@@ -604,7 +601,7 @@ function tokens() {
            s1: g("--series-1"), s2: g("--series-2"), s3: g("--series-3"), wash: g("--wash") };
 }
 let C = tokens();
-const FONT = 'IBM Plex Sans, Helvetica Neue, Arial, sans-serif';
+const FONT = 'system-ui, -apple-system, Segoe UI, PingFang SC, Microsoft YaHei, sans-serif';
 
 function el(tag, attrs = {}, parent) {
   const e = document.createElementNS(SVGNS, tag);
