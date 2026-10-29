@@ -1,4 +1,4 @@
-# One Hour One Life Statistics
+# One Hour One Life (OHOL) Statistics
 
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fxiyuez1.github.io%2FOneHourOneLife-Statistics%2F&label=website)](https://xiyuez1.github.io/OneHourOneLife-Statistics/)
 [![pages-build-deployment](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment)
