@@ -123,7 +123,6 @@ Files go into an `output` folder:
 * No login is needed. OHOLCurse shows lives to everyone.
 * OHOLCurse gives times in UTC. They are converted to your own time zone.
 * One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.
-* Deaths by another player show as `killer`. All boar deaths are grouped as `Boar`.
 * Most players never play in Donkey Town, so its lives are left out of the charts by default in all three versions.
 * Each run sends only a few requests. Please be kind to OHOLCurse and do not run it in a loop.
 * If OHOLCurse changes its page layout, the tool may stop working. Please open an issue.
@@ -245,7 +244,6 @@ Rscript ohol_stats.R "Firstname Lastname" --include-dt   # 包含 Donkey Town �
 * 无需登录。OHOLCurse 上的生命记录是公开的。
 * OHOLCurse 给的是 UTC 时间，会自动转换成你所在的时区。
 * 游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。
-* 被其他玩家杀死统一记为 `killer`。各种野猪合并成 `Boar`。
 * 默认不统计驴镇的生命。
 * 每次运行只发送几个请求。请不要循环运行，以免给 OHOLCurse 增加负担。
 * 如果 OHOLCurse 改了网页结构，这个工具可能会失效，欢迎提 issue。
