@@ -25,7 +25,7 @@ There are two ways to load lives:
 * **From OHOLCurse, with a bookmark.** Drag the **OHOL Stats** button on the page to your bookmarks bar. Open any player on oholcurse.com, then click the bookmark. A new tab opens with that player's charts. The bookmark has to run on oholcurse.com itself, because browsers do not let other websites read OHOLCurse directly.
 * **From a file.** Drop in a CSV or Excel file from the Python or R script, or any sheet with Age and Died columns.
 
-The page can save the charts as one PNG image and the lives as CSV.
+The page can save the charts as one PNG image and the lives as CSV. It is in English and Chinese. Use the switch at the top right.
 
 To host your own copy, turn on GitHub Pages for the `docs` folder of this repository (Settings, Pages, Deploy from a branch, `main` and `/docs`). If your copy lives at a different address, the bookmark on that copy points to it automatically.
 
@@ -100,7 +100,7 @@ Files go into an `output` folder:
 
 ## 中文说明
 
-这个工具直接从 OHOLCurse 读取某个玩家的全部生命记录，不需要登录，然后导出 CSV 和 Excel，并画一张包含九个统计图的总图。也可以用网页版：在 oholcurse 的玩家页面上点书签，或者把 CSV、Excel 文件拖进网页，直接出图。运行时直接写排行榜名、curse 名或角色名就行，比如 "Firstname Lastname"，也可以用玩家页面的网址或 hash。用法见上面的 Python 和 R 两部分。
+这个工具直接从 OHOLCurse 读取某个玩家的全部生命记录，不需要登录，然后导出 CSV 和 Excel，并画一张包含九个统计图的总图。也可以用网页版 https://xiyuez1.github.io/OneHourOneLife-Statistics/ ：在 oholcurse 的玩家页面上点书签，或者把 CSV、Excel 文件拖进网页，直接出图。网页右上角可以切换中文和英文。运行时直接写排行榜名、curse 名或角色名就行，比如 "Firstname Lastname"，也可以用玩家页面的网址或 hash。用法见上面的 Python 和 R 两部分。
 
 ## Licence
 
