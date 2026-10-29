@@ -1,8 +1,8 @@
 # One Hour One Life (OHOL) Statistics
 
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fxiyuez1.github.io%2FOneHourOneLife-Statistics%2F&label=website)](https://xiyuez1.github.io/OneHourOneLife-Statistics/)
-[![pages-build-deployment](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment)
-[![Last commit](https://img.shields.io/github/last-commit/XiyueZ1/OneHourOneLife-Statistics)](https://github.com/XiyueZ1/OneHourOneLife-Statistics/commits/main)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fdaisukez665.github.io%2FOHOL-lifestats%2F&label=website)](https://daisukez665.github.io/OHOL-lifestats/)
+[![pages-build-deployment](https://github.com/Daisukez665/OHOL-lifestats/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/Daisukez665/OHOL-lifestats/actions/workflows/pages/pages-build-deployment)
+[![Last commit](https://img.shields.io/github/last-commit/Daisukez665/OHOL-lifestats)](https://github.com/Daisukez665/OHOL-lifestats/commits/main)
 
 [English](#english) | [中文](#中文)
 
