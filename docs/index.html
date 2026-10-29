@@ -138,6 +138,9 @@ details.help[open] > summary { margin-bottom: 8px; }
 .empty-state { background: var(--surface); border: 1px dashed var(--ink-3); border-radius: var(--radius); padding: 28px 20px; text-align: center; color: var(--ink-2); }
 .empty-state h2 { margin: 0 0 6px; font-family: var(--font-display); font-weight: 500; font-size: 20px; color: var(--ink); }
 .empty-state p { margin: 0 auto; max-width: 60ch; }
+.dt-box { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.dt-toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.dt-toggle input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
 .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .tile { padding: 14px 16px; border-left: 3px solid var(--wheat); background: var(--surface); border-radius: 0 8px 8px 0; }
 .tile .k { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-2); }
@@ -239,6 +242,10 @@ footer a { color: var(--ink-2); }
   <div class="range-row" id="rangeRow">
     <span class="lbl" data-i18n="rangeLabel">Time range</span>
     <div class="range" role="group" id="rangeBar"></div>
+    <span class="dt-box" id="dtBox" hidden>
+      <label class="dt-toggle"><input type="checkbox" id="dtToggle"> <span data-i18n="dtLabel">Include Donkey Town</span></label>
+      <span class="note" id="dtNote"></span>
+    </span>
   </div>
   <div class="tiles" id="tiles"></div>
   <div class="grid" id="charts"></div>
@@ -281,6 +288,8 @@ const I18N = {
     bmTitle: "Drag me to your bookmarks bar",
     tableSummary: "All lives as a table",
     rangeLabel: "Time range",
+    dtLabel: "Include Donkey Town",
+    dtNote: (n) => `${n} Donkey Town lives left out`,
     ranges: { "1m": "Last month", "3m": "Last 3 months", "6m": "Last 6 months", "1y": "Last year", all: "All time" },
     helpSummary: "How do I add the bookmark?",
     copyBtn: "Copy bookmark code",
@@ -371,6 +380,8 @@ const I18N = {
     bmTitle: "把我拖到书签栏",
     tableSummary: "查看全部生命记录",
     rangeLabel: "时间范围",
+    dtLabel: "包含 Donkey Town",
+    dtNote: (n) => `已排除 ${n} 次 Donkey Town 的生命`,
     ranges: { "1m": "近 1 个月", "3m": "近 3 个月", "6m": "近 6 个月", "1y": "近 1 年", all: "全部" },
     helpSummary: "怎么添加书签？",
     copyBtn: "复制书签代码",
@@ -404,7 +415,7 @@ const I18N = {
     visits: "本页访问量：",
     footer: '数据来自 <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>。游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。',
     player: "玩家", srcOhol: "OHOLCurse", srcLast: "上次从 OHOLCurse 读取的数据",
-    showing: (n, src) => `共 ${n} 条生命记录${src ? "，来自" + src : ""}。`,
+    showing: (n, src) => `共 ${n} 次生命${src ? "，来自" + src : ""}。`,
     noLives: "没有找到生命记录。文件至少需要 Age 和 Died 两列。",
     reading: (f) => `正在读取 ${f} ...`,
     badFile: (e) => `无法读取这个文件。请使用带表头的 .csv 或 .xlsx 文件。（${e}）`,
@@ -414,24 +425,24 @@ const I18N = {
     waiting: "正在等待 OHOLCurse 发送数据 ...",
     noData: "这张图没有数据。",
     tHours: "游戏总时长", tHoursSub: (d) => `合 ${d} 天`,
-    tLives: "局数", tRange: (a, b) => `${a} 至 ${b}`,
-    t60: "活到 60 岁", t60Sub: (n) => `${n} 局`,
+    tLives: "生命次数", tRange: (a, b) => `${a} 至 ${b}`,
+    t60: "活到 60 岁", t60Sub: (n) => `${n} 次生命`,
     tAvg: "平均寿命", tAvgSub: "死亡时的年龄",
-    cHour: "一天中的时段", cHourSub: "每个小时开始的局数",
-    cHourTip: (h, n, p) => `${h}:00 至 ${h}:59  ${n} 局（${p}%）`,
-    cWeek: "星期几", cWeekSub: "每个星期几开始的局数",
-    cWeekTip: (d, n, p) => `${d}：${n} 局（${p}%）`,
-    cMonth: "每月局数", cMonthSub: "截至本月",
-    cMonthTip: (m, n) => `${m}：${n} 局`,
+    cHour: "一天中的时段", cHourSub: "每个小时开始的生命次数",
+    cHourTip: (h, n, p) => `${h}:00 至 ${h}:59  ${n} 次生命（${p}%）`,
+    cWeek: "星期几", cWeekSub: "每个星期几开始的生命次数",
+    cWeekTip: (d, n, p) => `${d}：${n} 次生命（${p}%）`,
+    cMonth: "每月生命次数", cMonthSub: "截至本月",
+    cMonthTip: (m, n) => `${m}：${n} 次生命`,
     cAge: "死亡年龄", cAgeSub: "平滑后的分布，0 到 60 岁",
-    cAgeTip: (a, b, n, p) => `${a} 至 ${b} 岁：${n} 局（${p}%）`,
+    cAgeTip: (a, b, n, p) => `${a} 至 ${b} 岁：${n} 次生命（${p}%）`,
     cCause: "死因", cCauseSub: "前十名，各种野猪合并计算",
-    cSex: "角色性别", cSexSub: "占全部局数的比例",
+    cSex: "角色性别", cSexSub: "占全部生命的比例",
     cFirst: "名字", cFirstSub: "前十名，不含 EVE",
     cLast: "姓氏", cLastSub: "前十名",
     cDaily: "每天游戏时长", cDailySub: "每根柱子代表一天",
     dailyPeak: (h, d) => `${d}：${h} 小时`, dailyTip: (wd, d, h) => `${d} ${wd}：${h} 小时`,
-    lives: "局",
+    lives: "次生命",
     sex: { female: "女", male: "男", unknown: "未知" },
     days: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
     daysShort: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
@@ -444,8 +455,8 @@ const I18N = {
     exportTitle: (p) => (p ? `一小时人生 游戏统计：${p}` : "一小时人生 游戏统计"),
     bm: { notPlayer: "OHOL Stats：请先在 oholcurse.com 上打开一个玩家页面，再点一次书签。",
           blocked: "OHOL Stats：新标签页被拦截了。请允许 oholcurse.com 弹出窗口，然后再点一次。",
-          reading: "OHOL Stats：正在读取生命记录 ...", read: "OHOL Stats：读取了 N 条记录。",
-          sent: "OHOL Stats：已把 N 条记录发送到统计页面。",
+          reading: "OHOL Stats：正在读取生命记录 ...", read: "OHOL Stats：读取了 N 次生命。",
+          sent: "OHOL Stats：已把 N 次生命发送到统计页面。",
           failed: "OHOL Stats：无法读取生命记录，网站结构可能改了。" },
   },
 };
@@ -499,8 +510,12 @@ function makeLife(name, surname, lifeId, age, sex, location, diedTo, died) {
   if (!died || !isFinite(age)) return null;
   diedTo = clean(diedTo).replace(/^killer_\d+$/, "killer") || "unknown";
   const born = new Date(died.getTime() - Math.round(age * 60000));
+  location = clean(location);
+  // Donkey Town sits far to the west, around x = -200,000,000. The normal world stays within about a million.
+  const x = parseFloat(location.split("/")[0]);
+  const dt = /\//.test(location) && isFinite(x) && x <= -100000000;
   return { name: clean(name) || null, surname: clean(surname) || null, lifeId: clean(lifeId),
-           age, sex: clean(sex).toLowerCase() || "unknown", location: clean(location), diedTo, born, died };
+           age, sex: clean(sex).toLowerCase() || "unknown", location, diedTo, born, died, dt };
 }
 
 // Rows from a sheet, keyed by header. Header names are matched loosely.
@@ -805,7 +820,17 @@ function rangeStart() {
   }
   const d = today0(); d.setMonth(d.getMonth() - months); return d;
 }
-const inRange = () => { const s0 = rangeStart(); return LIVES.filter((l) => l.born >= s0); };
+let INCLUDE_DT = false;
+try { INCLUDE_DT = localStorage.getItem("ohol-dt") === "1"; } catch (_) {}
+const inRange = () => { const s0 = rangeStart(); return LIVES.filter((l) => l.born >= s0 && (INCLUDE_DT || !l.dt)); };
+function renderDtToggle() {
+  const s0 = rangeStart();
+  const n = LIVES.filter((l) => l.dt && l.born >= s0).length;
+  const any = LIVES.some((l) => l.dt);
+  $("dtBox").hidden = !any;
+  $("dtToggle").checked = INCLUDE_DT;
+  $("dtNote").textContent = !INCLUDE_DT && n ? tr("dtNote", fmt(n)) : "";
+}
 function renderRangeBar() {
   const bar = $("rangeBar"); bar.innerHTML = "";
   for (const [key] of RANGES) {
@@ -860,6 +885,7 @@ function renderAll() {
   C = tokens();
   if (!LIVES.length) return;
   renderRangeBar();
+  renderDtToggle();
   const start = rangeStart();
   const L = inRange();
   const pct = (n) => fmt(L.length ? (100 * n) / L.length : 0, 1);
@@ -1071,6 +1097,12 @@ if (/\.github\.io$/.test(location.hostname)) {
     .then((d) => { if (d && d.count) { $("visitCount").textContent = d.count; $("visits").hidden = false; } })
     .catch(() => {});
 }
+
+$("dtToggle").addEventListener("change", (e) => {
+  INCLUDE_DT = e.target.checked;
+  try { localStorage.setItem("ohol-dt", INCLUDE_DT ? "1" : "0"); } catch (_) {}
+  renderAll();
+});
 
 // ---------- Wiring ----------
 const drop = $("drop"), input = $("fileInput");
