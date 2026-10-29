@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Charts of one player's One Hour One Life history from OHOLCurse.">
+<title>OHOL Life Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* Layout: a working tool. Controls band on top, four summary tiles, then a two column grid of chart cards, then the raw table. */
+:root {
+  --bg: #f4f6f1;
+  --surface: #fcfdfa;
+  --ink: #1d2620;
+  --ink-2: #4c5850;
+  --ink-3: #7a857d;
+  --line: #e1e6dd;
+  --grid: #e9ece5;
+  --accent: #2f6b45;
+  --accent-ink: #ffffff;
+  --wheat: #b8862a;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #7a857d;
+  --wash: rgba(42, 120, 214, 0.12);
+  --tip-bg: #1d2620;
+  --tip-ink: #f4f6f1;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141815; --surface: #1b201c; --ink: #e9eee8; --ink-2: #b4beb6; --ink-3: #87918a;
+    --line: #2b322d; --grid: #262c27; --accent: #6fbf8a; --accent-ink: #0f1a12; --wheat: #d9a845;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #87918a; --wash: rgba(57, 135, 229, 0.16);
+    --tip-bg: #e9eee8; --tip-ink: #141815;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141815; --surface: #1b201c; --ink: #e9eee8; --ink-2: #b4beb6; --ink-3: #87918a;
+  --line: #2b322d; --grid: #262c27; --accent: #6fbf8a; --accent-ink: #0f1a12; --wheat: #d9a845;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #87918a; --wash: rgba(57, 135, 229, 0.16);
+  --tip-bg: #e9eee8; --tip-ink: #141815;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; }
+
+header.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+.brand h1 {
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 4.2vw, 40px);
+  line-height: 1.05; margin: 0; letter-spacing: -0.01em; text-wrap: balance;
+}
+.brand p { margin: 6px 0 0; color: var(--ink-2); max-width: 62ch; }
+.player-tag { font-family: var(--font-data); font-size: 13px; color: var(--ink-2); }
+.player-tag b { color: var(--ink); font-weight: 500; }
+
+.controls {
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px;
+}
+.controls > section { min-width: 0; display: grid; gap: 10px; align-content: start; }
+.controls h2 {
+  margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600;
+}
+.drop {
+  border: 1.5px dashed var(--ink-3); border-radius: 8px; padding: 18px; text-align: center; color: var(--ink-2);
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.drop:hover, .drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.drop strong { color: var(--ink); }
+.drop input { display: none; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, .btn {
+  font: inherit; font-size: 14px; font-weight: 500; border-radius: 8px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+button:hover, .btn:hover { border-color: var(--ink-3); }
+button.primary, .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:focus-visible, .btn:focus-visible, .drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bookmarklet { cursor: grab; }
+.note { font-size: 13px; color: var(--ink-2); margin: 0; }
+ol.steps { margin: 0; padding-left: 20px; font-size: 14px; color: var(--ink-2); display: grid; gap: 4px; }
+ol.steps b { color: var(--ink); font-weight: 600; }
+.status { font-size: 14px; min-height: 1.5em; margin: 0; }
+.status.err { color: #c2412d; }
+:root[data-theme="dark"] .status.err { color: #ef7a62; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .status.err { color: #ef7a62; } }
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tile { padding: 14px 16px; border-left: 3px solid var(--wheat); background: var(--surface); border-radius: 0 8px 8px 0; }
+.tile .k { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-2); }
+.tile .v { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 13px; color: var(--ink-3); font-family: var(--font-data); }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px 10px; min-width: 0; }
+.card.wide { grid-column: 1 / -1; }
+.card h3 { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 17px; }
+.card .sub { margin: 2px 0 6px; font-size: 13px; color: var(--ink-3); }
+.card svg { display: block; width: 100%; height: auto; overflow: visible; }
+.empty { color: var(--ink-3); font-size: 14px; padding: 30px 0; text-align: center; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+details.table { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; }
+details.table summary { cursor: pointer; font-weight: 600; }
+.tbl-wrap { overflow-x: auto; margin-top: 10px; max-height: 480px; overflow-y: auto; }
+table { border-collapse: collapse; font-size: 13px; width: 100%; }
+th, td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--surface); color: var(--ink-2); font-weight: 600; }
+td.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; text-align: right; }
+
+.tip {
+  position: fixed; pointer-events: none; z-index: 20; background: var(--tip-bg); color: var(--tip-ink);
+  font-size: 13px; padding: 6px 9px; border-radius: 6px; font-family: var(--font-data); white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+footer { font-size: 13px; color: var(--ink-3); }
+footer a { color: var(--ink-2); }
+
+@media (max-width: 820px) {
+  .controls { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>OHOL Life Stats</h1>
+      <p>Charts of one player's One Hour One Life history, from the lives list on OHOLCurse. Everything runs in your browser. Nothing is uploaded.</p>
+    </div>
+    <div class="player-tag" id="playerTag"></div>
+  </header>
+
+  <div class="controls">
+    <section aria-labelledby="h-file">
+      <h2 id="h-file">Load a file</h2>
+      <label class="drop" id="drop" tabindex="0">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+        <strong>Drop a CSV or Excel file here</strong>, or click to choose one.<br>
+        <span class="note">Works with the files from the R or Python script, or any sheet with Age and Died columns.</span>
+      </label>
+      <div class="row">
+        <button type="button" id="sampleBtn">Show sample player</button>
+        <button type="button" id="saveBtn" class="primary">Save chart image</button>
+        <button type="button" id="csvBtn">Save CSV</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </section>
+    <section aria-labelledby="h-bm">
+      <h2 id="h-bm">Or read straight from OHOLCurse</h2>
+      <ol class="steps">
+        <li>Drag this button to your bookmarks bar: <a class="btn bookmarklet" id="bmLink" href="#" title="Drag me to your bookmarks bar">OHOL Stats</a></li>
+        <li>Open any player on <b>oholcurse.com</b>. Search by leaderboard, curse or character name.</li>
+        <li>Click the bookmark. A new tab opens here with that player's charts.</li>
+      </ol>
+      <p class="note" id="bmNote">If your browser blocks the new tab, allow pop ups for oholcurse.com and click again.</p>
+    </section>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+  <div class="grid" id="charts"></div>
+
+  <details class="table" id="tableBox">
+    <summary>All lives as a table</summary>
+    <div class="tbl-wrap" id="tableWrap"></div>
+  </details>
+
+  <footer>Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.</footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(() => {
+"use strict";
+
+// Where the bookmarklet sends players. A copy served from GitHub Pages or a local server uses itself.
+const DEFAULT_APP_URL = "https://xiyuez1.github.io/OneHourOneLife-Statistics/";
+const OHOL_ORIGIN = "https://oholcurse.com";
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const $ = (id) => document.getElementById(id);
+const SVGNS = "http://www.w3.org/2000/svg";
+
+let LIVES = [];
+let PLAYER = "";
+
+// ---------- Small helpers ----------
+const pad = (n) => String(n).padStart(2, "0");
+const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const ym = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+const hms = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const fmt = (n, dp = 0) => Number(n).toLocaleString("en-CA", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function setStatus(msg, isErr = false) {
+  const s = $("status");
+  s.textContent = msg;
+  s.classList.toggle("err", isErr);
+}
+
+// Wall clock date from "YYYY-MM-DD HH:MM:SS", ISO text, an Excel serial or a Date
+function toWallClock(v, isUtc = false) {
+  if (v == null || v === "") return null;
+  if (v instanceof Date) return isNaN(v) ? null : v;
+  if (typeof v === "number") {
+    const u = new Date(Math.round((v - 25569) * 86400000));
+    return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate(), u.getUTCHours(), u.getUTCMinutes(), u.getUTCSeconds());
+  }
+  const m = String(v).trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) { const d = new Date(v); return isNaN(d) ? null : d; }
+  const p = m.slice(1).map((x) => Number(x || 0));
+  return isUtc ? new Date(Date.UTC(p[0], p[1] - 1, p[2], p[3], p[4], p[5]))
+               : new Date(p[0], p[1] - 1, p[2], p[3], p[4], p[5]);
+}
+
+const clean = (s) => (s == null ? "" : String(s).replace(/ /g, " ").trim());
+
+function makeLife(name, surname, lifeId, age, sex, location, diedTo, died) {
+  age = Number(age);
+  if (!died || !isFinite(age)) return null;
+  diedTo = clean(diedTo).replace(/^killer_\d+$/, "killer") || "unknown";
+  const born = new Date(died.getTime() - Math.round(age * 60000));
+  return { name: clean(name) || null, surname: clean(surname) || null, lifeId: clean(lifeId),
+           age, sex: clean(sex).toLowerCase() || "unknown", location: clean(location), diedTo, born, died };
+}
+
+// Rows from a sheet, keyed by header. Header names are matched loosely.
+function livesFromObjects(objs) {
+  const key = (o, ...names) => {
+    for (const k of Object.keys(o)) {
+      const n = k.toLowerCase().replace(/[^a-z]/g, "");
+      if (names.includes(n)) return o[k];
+    }
+    return undefined;
+  };
+  const out = [];
+  for (const o of objs) {
+    let name = key(o, "name"), surname = key(o, "surname", "lastname", "familyname");
+    if (surname === undefined && name && String(name).includes(" ")) {
+      const parts = String(name).trim().split(/\s+/);
+      name = parts.shift(); surname = parts.join(" ");
+    }
+    const life = makeLife(name, surname, key(o, "lifeid", "id"), key(o, "age"), key(o, "sex", "gender"),
+      key(o, "location"), key(o, "diedto", "cause", "deathcause"), toWallClock(key(o, "died", "death", "diedat")));
+    if (life) out.push(life);
+  }
+  return out;
+}
+
+// Rows sent by the bookmarklet: [full name, life id, age, sex, location, died to, died]
+function livesFromBookmarklet(rows, utc) {
+  const out = [];
+  for (const r of rows) {
+    if (!Array.isArray(r) || r.length < 7) continue;
+    const parts = clean(r[0]).split(/\s+/);
+    const life = makeLife(parts.shift(), parts.join(" "), r[1], r[2], r[3], r[4], r[5], toWallClock(r[6], utc));
+    if (life) out.push(life);
+  }
+  return out;
+}
+
+// ---------- Loading ----------
+function load(lives, player, source) {
+  if (!lives.length) { setStatus("No lives found. The file needs at least an Age column and a Died column.", true); return; }
+  lives.sort((a, b) => b.died - a.died);
+  LIVES = lives;
+  PLAYER = player || "";
+  $("playerTag").innerHTML = "";
+  if (PLAYER) {
+    const b = document.createElement("b"); b.textContent = PLAYER;
+    $("playerTag").append("Player ", b);
+  }
+  setStatus(`Showing ${fmt(lives.length)} lives${source ? " from " + source : ""}.`);
+  renderAll();
+}
+
+async function readFile(file) {
+  try {
+    setStatus("Reading " + file.name + " ...");
+    let wb;
+    if (/\.csv$/i.test(file.name)) wb = XLSX.read(await file.text(), { type: "string", raw: true });
+    else wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+    const sheetName = wb.SheetNames.find((n) => n.toLowerCase() === "record") || wb.SheetNames[0];
+    const objs = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { raw: true, defval: null });
+    const guess = file.name.replace(/\.[^.]+$/, "").replace(/^OHOL_lives_/, "");
+    load(livesFromObjects(objs), guess, file.name);
+  } catch (e) {
+    setStatus("Could not read that file. Use a .csv or .xlsx file with a header row. (" + e.message + ")", true);
+  }
+}
+
+// Sample player with made up lives, so the page shows what it does before you load anything
+function samplePlayer() {
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const firsts = ["ROSE", "OAK", "LILY", "FINN", "IVY", "JUNO", "ROWAN", "WREN", "ASH", "MAPLE", "SAGE", "OTIS"];
+  const lasts = ["BERRY", "STONE", "RIVER", "MILL", "HONEY", "FROST", "BROOK", "FERN"];
+  const causes = [["hunger", 30], ["Wolf", 4], ["Wild_Boar", 3], ["Yellow_Fever", 2], ["killer", 2], ["Rattle_Snake", 1], ["Hungry_Grizzly_Bear", 1]];
+  const total = causes.reduce((s, c) => s + c[1], 0);
+  const lives = [];
+  const start = new Date(); start.setMonth(start.getMonth() - 14);
+  for (let i = 0; i < 420; i++) {
+    const day = new Date(start.getTime() + rnd() * 420 * 86400000);
+    const hour = [18, 19, 20, 20, 21, 21, 22, 22, 23, 0, 1, 13, 15, 17][Math.floor(rnd() * 14)];
+    const born = new Date(day.getFullYear(), day.getMonth(), day.getDate(), hour, Math.floor(rnd() * 60), Math.floor(rnd() * 60));
+    if (born > new Date()) continue;
+    let age = 60, cause = "oldAge";
+    if (rnd() < 0.36) {
+      age = Math.round((rnd() < 0.3 ? rnd() * 12 : 12 + rnd() * 47) * 100) / 100;
+      let r = rnd() * total;
+      for (const [c, w] of causes) { if ((r -= w) <= 0) { cause = c; break; } }
+    }
+    const eve = rnd() < 0.08;
+    lives.push(makeLife(eve ? "EVE" : firsts[Math.floor(rnd() * firsts.length)], lasts[Math.floor(rnd() * lasts.length)],
+      9000000 + i, age, rnd() < 0.7 ? "female" : "male", "", cause, new Date(born.getTime() + age * 60000)));
+  }
+  return lives;
+}
+
+// ---------- Chart drawing ----------
+function tokens() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = (n) => cs.getPropertyValue(n).trim();
+  return { surface: g("--surface"), ink: g("--ink"), ink2: g("--ink-2"), ink3: g("--ink-3"), grid: g("--grid"),
+           s1: g("--series-1"), s2: g("--series-2"), s3: g("--series-3"), wash: g("--wash") };
+}
+let C = tokens();
+const FONT = 'IBM Plex Sans, Helvetica Neue, Arial, sans-serif';
+
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v != null) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function svgRoot(w, h) {
+  return el("svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, "font-family": FONT, role: "img" });
+}
+function text(parent, x, y, str, opts = {}) {
+  const t = el("text", { x, y, fill: opts.fill || C.ink2, "font-size": opts.size || 11, "text-anchor": opts.anchor || "middle",
+                         "dominant-baseline": opts.baseline || "auto", "font-weight": opts.weight || null }, parent);
+  t.textContent = str;
+  return t;
+}
+function niceStep(max, n = 4) {
+  const raw = (max > 0 ? max : 1) / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const r = raw / mag;
+  return (r <= 1 ? 1 : r <= 2 ? 2 : r <= 2.5 ? 2.5 : r <= 5 ? 5 : 10) * mag;
+}
+function yAxis(svg, m, w, h, max, fmtFn = (v) => fmt(v, v % 1 ? 1 : 0)) {
+  const step = niceStep(max), top = Math.ceil(max / step) * step || step;
+  const y = (v) => m.t + (h - m.t - m.b) * (1 - v / top);
+  for (let v = 0; v <= top + 1e-9; v += step) {
+    el("line", { x1: m.l, x2: w - m.r, y1: y(v), y2: y(v), stroke: C.grid, "stroke-width": 1 }, svg);
+    text(svg, m.l - 6, y(v) + 4, fmtFn(v), { anchor: "end", fill: C.ink3 });
+  }
+  return y;
+}
+// Column with a 4px rounded top and a square base
+function colPath(x, y, w, h, r = 4) {
+  r = Math.min(r, w / 2, h);
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
+// Bar with a 4px rounded right end
+function barPath(x, y, w, h, r = 4) {
+  r = Math.min(r, h / 2, w);
+  return `M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z`;
+}
+function hit(svg, x, y, w, h, tip) {
+  el("rect", { x, y, width: w, height: h, fill: "transparent", "data-tip": tip }, svg);
+}
+
+function columns(labels, values, { tipFn, labelStride = 1, labelFn = (l) => l, valueLabels = "max", height = 230 } = {}) {
+  const w = 600, m = { t: 22, r: 8, b: 26, l: 40 }, svg = svgRoot(w, height);
+  const max = Math.max(...values, 1), y = yAxis(svg, m, w, height, max);
+  const band = (w - m.l - m.r) / values.length, bw = Math.min(24, band - 2);
+  const maxI = values.indexOf(Math.max(...values));
+  values.forEach((v, i) => {
+    const x = m.l + band * i + (band - bw) / 2;
+    if (v > 0) el("path", { d: colPath(x, y(v), bw, y(0) - y(v)), fill: C.s1 }, svg);
+    if (valueLabels === "all" || i === maxI) text(svg, x + bw / 2, y(v) - 6, fmt(v), { fill: C.ink, weight: i === maxI ? 600 : null });
+    if (i % labelStride === 0) text(svg, x + bw / 2, height - 8, labelFn(labels[i], i), { fill: C.ink3 });
+    hit(svg, m.l + band * i, m.t, band, height - m.t - m.b, tipFn ? tipFn(i) : `${labels[i]}: ${fmt(v)}`);
+  });
+  return svg;
+}
+
+function rankedBars(entries, { tipFn } = {}) {
+  entries = entries.slice(0, 10);
+  if (!entries.length) return null;
+  const rowH = 26, w = 600, labelW = 170, m = { t: 6, r: 44, b: 6 };
+  const h = m.t + m.b + rowH * entries.length, svg = svgRoot(w, h);
+  const max = Math.max(...entries.map((e) => e[1]));
+  const x = (v) => labelW + (w - labelW - m.r) * (v / max);
+  entries.forEach(([label, v], i) => {
+    const yy = m.t + i * rowH, bh = Math.min(18, rowH - 6), by = yy + (rowH - bh) / 2;
+    const shown = label.length > 24 ? label.slice(0, 23) + "…" : label;
+    text(svg, labelW - 10, yy + rowH / 2 + 4, shown.replace(/_/g, " "), { anchor: "end", fill: C.ink2, size: 12 });
+    el("path", { d: barPath(labelW, by, Math.max(x(v) - labelW, 2), bh), fill: C.s1 }, svg);
+    text(svg, x(v) + 6, yy + rowH / 2 + 4, fmt(v), { anchor: "start", fill: C.ink, size: 12 });
+    hit(svg, 0, yy, w, rowH, tipFn ? tipFn(label, v) : `${label.replace(/_/g, " ")}: ${fmt(v)}`);
+  });
+  return svg;
+}
+
+function lineChart(labels, values, { labelFn, tipFn } = {}) {
+  const w = 600, h = 230, m = { t: 22, r: 16, b: 26, l: 40 }, svg = svgRoot(w, h);
+  const max = Math.max(...values, 1), y = yAxis(svg, m, w, h, max);
+  const n = values.length, step = n > 1 ? (w - m.l - m.r) / (n - 1) : 0;
+  const x = (i) => (n > 1 ? m.l + step * i : (w + m.l - m.r) / 2);
+  const pts = values.map((v, i) => [x(i), y(v)]);
+  el("path", { d: `M${pts[0][0]},${y(0)}` + pts.map((p) => `L${p[0]},${p[1]}`).join("") + `L${pts[n - 1][0]},${y(0)}Z`, fill: C.wash }, svg);
+  el("path", { d: "M" + pts.map((p) => p.join(",")).join("L"), fill: "none", stroke: C.s1, "stroke-width": 2,
+               "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+  const maxI = values.indexOf(Math.max(...values));
+  const stride = Math.max(1, Math.ceil(n / 8));
+  values.forEach((v, i) => {
+    if (i === maxI || i === n - 1) {
+      el("circle", { cx: pts[i][0], cy: pts[i][1], r: 4.5, fill: C.s1, stroke: C.surface, "stroke-width": 2 }, svg);
+      text(svg, pts[i][0], pts[i][1] - 10, fmt(v), { fill: C.ink, weight: 600 });
+    }
+    if ((n - 1 - i) % stride === 0) text(svg, x(i), h - 8, labelFn ? labelFn(labels[i]) : labels[i],
+      { fill: C.ink3, anchor: i === n - 1 && n > 1 ? "end" : i === 0 ? "start" : "middle" });
+    hit(svg, x(i) - step / 2, m.t, Math.max(step, 8), h - m.t - m.b, tipFn ? tipFn(i) : `${labels[i]}: ${fmt(v)}`);
+  });
+  return svg;
+}
+
+function density(ages) {
+  const w = 600, h = 230, m = { t: 22, r: 16, b: 26, l: 40 }, svg = svgRoot(w, h);
+  const n = ages.length;
+  const mean = ages.reduce((s, a) => s + a, 0) / n;
+  const sd = Math.sqrt(ages.reduce((s, a) => s + (a - mean) ** 2, 0) / Math.max(n - 1, 1)) || 1;
+  const bw = 1.06 * sd * Math.pow(n, -0.2);
+  const xs = [], ds = [];
+  for (let a = 0; a <= 60.001; a += 0.5) {
+    let s = 0;
+    for (const v of ages) s += Math.exp(-0.5 * ((a - v) / bw) ** 2);
+    xs.push(a); ds.push(s / (n * bw * Math.sqrt(2 * Math.PI)));
+  }
+  const max = Math.max(...ds), y = yAxis(svg, m, w, h, max, (v) => v.toFixed(2));
+  const x = (a) => m.l + (w - m.l - m.r) * (a / 60);
+  const pts = xs.map((a, i) => [x(a), y(ds[i])]);
+  el("path", { d: `M${x(0)},${y(0)}L` + pts.map((p) => p.join(",")).join("L") + `L${x(60)},${y(0)}Z`, fill: C.wash }, svg);
+  el("path", { d: "M" + pts.map((p) => p.join(",")).join("L"), fill: "none", stroke: C.s1, "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+  for (let a = 0; a <= 60; a += 10) text(svg, x(a), h - 8, String(a), { fill: C.ink3 });
+  const bins = Array(6).fill(0);
+  ages.forEach((a) => bins[Math.min(5, Math.floor(a / 10))]++);
+  bins.forEach((c, i) => hit(svg, x(i * 10), m.t, x(10) - x(0), h - m.t - m.b,
+    `Age ${i * 10} to ${i === 5 ? 60 : i * 10 + 10}: ${fmt(c)} lives (${fmt((100 * c) / n, 1)}%)`));
+  return svg;
+}
+
+function donut(entries) {
+  const w = 600, h = 230, svg = svgRoot(w, h), cx = 170, cy = 115, R = 92, r = 58;
+  const total = entries.reduce((s, e) => s + e[1], 0);
+  const color = { female: C.s2, male: C.s1 };
+  let a0 = -Math.PI / 2;
+  entries.forEach(([label, v]) => {
+    const a1 = a0 + (2 * Math.PI * v) / total, large = a1 - a0 > Math.PI ? 1 : 0;
+    const p = (rad, ang) => [cx + rad * Math.cos(ang), cy + rad * Math.sin(ang)];
+    const [x0, y0] = p(R, a0), [x1, y1] = p(R, a1), [x2, y2] = p(r, a1), [x3, y3] = p(r, a0);
+    const d = v === total
+      ? `M${cx + R},${cy}A${R},${R} 0 1 1 ${cx - R},${cy}A${R},${R} 0 1 1 ${cx + R},${cy}ZM${cx + r},${cy}A${r},${r} 0 1 0 ${cx - r},${cy}A${r},${r} 0 1 0 ${cx + r},${cy}Z`
+      : `M${x0},${y0}A${R},${R} 0 ${large} 1 ${x1},${y1}L${x2},${y2}A${r},${r} 0 ${large} 0 ${x3},${y3}Z`;
+    el("path", { d, fill: color[label] || C.s3, stroke: C.surface, "stroke-width": 2, "fill-rule": "evenodd",
+                 "data-tip": `${label}: ${fmt(v)} (${fmt((100 * v) / total, 1)}%)` }, svg);
+    a0 = a1;
+  });
+  text(svg, cx, cy - 2, fmt(total), { fill: C.ink, size: 22, weight: 600 });
+  text(svg, cx, cy + 18, "lives", { fill: C.ink3, size: 12 });
+  entries.forEach(([label, v], i) => {
+    const yy = 80 + i * 44;
+    el("rect", { x: 320, y: yy - 11, width: 12, height: 12, rx: 3, fill: color[label] || C.s3 }, svg);
+    text(svg, 342, yy, label.charAt(0).toUpperCase() + label.slice(1), { anchor: "start", fill: C.ink2, size: 14 });
+    text(svg, 342, yy + 20, `${fmt((100 * v) / total, 1)}%  ·  ${fmt(v)}`, { anchor: "start", fill: C.ink, size: 14, weight: 600 });
+  });
+  return svg;
+}
+
+function dailyChart(days, hours) {
+  const w = 1200, h = 220, m = { t: 22, r: 10, b: 26, l: 40 }, svg = svgRoot(w, h);
+  const max = Math.max(...hours, 1), y = yAxis(svg, m, w, h, max);
+  const n = hours.length, band = (w - m.l - m.r) / n, bw = Math.max(1, Math.min(10, band - (band > 3 ? 1 : 0)));
+  const maxI = hours.indexOf(Math.max(...hours));
+  hours.forEach((v, i) => {
+    if (v <= 0) return;
+    const x = m.l + band * i + (band - bw) / 2;
+    el("path", { d: bw >= 6 ? colPath(x, y(v), bw, y(0) - y(v), 2) : `M${x},${y(0)}V${y(v)}h${bw}V${y(0)}Z`, fill: C.s1 }, svg);
+  });
+  const xm = m.l + band * maxI + band / 2;
+  text(svg, Math.min(Math.max(xm, m.l + 60), w - 60), y(hours[maxI]) - 6, `${fmt(hours[maxI], 1)} h on ${days[maxI]}`, { fill: C.ink, weight: 600 });
+  // month ticks
+  const monthIdx = days.map((d, i) => (d.endsWith("-01") || i === 0 ? i : -1)).filter((i) => i >= 0);
+  const stride = Math.max(1, Math.ceil(monthIdx.length / 12));
+  monthIdx.forEach((i, k) => {
+    if (k % stride || m.l + band * i > w - m.r - 44) return;
+    const [yy, mm] = days[i].split("-");
+    text(svg, m.l + band * i, h - 8, `${MONTHS[+mm - 1]} ${yy.slice(2)}`, { anchor: "start", fill: C.ink3 });
+  });
+  const overlay = el("rect", { x: m.l, y: m.t, width: w - m.l - m.r, height: h - m.t - m.b, fill: "transparent", "data-daily": 1 }, svg);
+  overlay.__days = days; overlay.__hours = hours; overlay.__band = band; overlay.__left = m.l; overlay.__w = w;
+  return svg;
+}
+
+// ---------- Page sections ----------
+function card(title, sub, svg, { wide = false, legend = null } = {}) {
+  const c = document.createElement("section");
+  c.className = "card" + (wide ? " wide" : "");
+  const h = document.createElement("h3"); h.textContent = title; c.appendChild(h);
+  const p = document.createElement("p"); p.className = "sub"; p.textContent = sub; c.appendChild(p);
+  if (svg) {
+    svg.setAttribute("aria-label", title);
+    c.appendChild(svg);
+  } else {
+    const e = document.createElement("div"); e.className = "empty"; e.textContent = "No data for this chart."; c.appendChild(e);
+  }
+  if (legend) c.appendChild(legend);
+  c.__svg = svg; c.__title = title; c.__sub = sub;
+  return c;
+}
+
+function countBy(arr, fn) {
+  const m = new Map();
+  for (const x of arr) { const k = fn(x); if (k == null || k === "") continue; m.set(k, (m.get(k) || 0) + 1); }
+  return [...m.entries()].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])));
+}
+
+function renderTiles(L) {
+  const hours = L.reduce((s, l) => s + l.age, 0) / 60;
+  const full = L.filter((l) => l.age >= 60).length;
+  const avg = L.reduce((s, l) => s + l.age, 0) / L.length;
+  const first = L.reduce((a, l) => (l.born < a ? l.born : a), L[0].born);
+  const last = L.reduce((a, l) => (l.died > a ? l.died : a), L[0].died);
+  const tiles = [
+    ["Hours played", fmt(hours, 1), `${fmt(hours / 24, 1)} days`],
+    ["Lives", fmt(L.length), `${ymd(first)} to ${ymd(last)}`],
+    ["Lived to 60", `${fmt((100 * full) / L.length, 1)}%`, `${fmt(full)} lives`],
+    ["Average age", fmt(avg, 1), "years at death"],
+  ];
+  const box = $("tiles"); box.innerHTML = "";
+  for (const [k, v, s] of tiles) {
+    const t = document.createElement("div"); t.className = "tile";
+    for (const [cls, val] of [["k", k], ["v", v], ["s", s]]) {
+      const d = document.createElement("div"); d.className = cls; d.textContent = val; t.appendChild(d);
+    }
+    box.appendChild(t);
+  }
+}
+
+function renderTable(L) {
+  const cols = [["Date", (l) => ymd(l.born)], ["Name", (l) => l.name || ""], ["Surname", (l) => l.surname || ""],
+    ["Life ID", (l) => l.lifeId, "num"], ["Age", (l) => fmt(l.age, 2), "num"], ["Sex", (l) => l.sex],
+    ["Died to", (l) => l.diedTo], ["Born", (l) => hms(l.born), "num"], ["Died", (l) => `${ymd(l.died)} ${hms(l.died)}`, "num"]];
+  const t = document.createElement("table");
+  const tr = t.createTHead().insertRow();
+  for (const [h] of cols) { const th = document.createElement("th"); th.textContent = h; tr.appendChild(th); }
+  const tb = t.createTBody();
+  for (const l of L) {
+    const r = tb.insertRow();
+    for (const [, f, cls] of cols) { const c = r.insertCell(); c.textContent = f(l); if (cls) c.className = cls; }
+  }
+  $("tableWrap").innerHTML = ""; $("tableWrap").appendChild(t);
+}
+
+function renderAll() {
+  C = tokens();
+  const L = LIVES;
+  if (!L.length) return;
+  renderTiles(L);
+  const box = $("charts"); box.innerHTML = "";
+
+  const hours = Array(24).fill(0); L.forEach((l) => hours[l.born.getHours()]++);
+  const hLabels = hours.map((_, i) => pad(i));
+  box.appendChild(card("Time of day", "Lives started in each hour", columns(hLabels, hours, {
+    labelStride: 3, tipFn: (i) => `${pad(i)}:00 to ${pad(i)}:59  ${fmt(hours[i])} lives (${fmt((100 * hours[i]) / L.length, 1)}%)` })));
+
+  const week = Array(7).fill(0); L.forEach((l) => week[(l.born.getDay() + 6) % 7]++);
+  box.appendChild(card("Day of the week", "Lives started on each weekday", columns(WEEKDAYS, week, {
+    valueLabels: "all", labelFn: (l) => l.slice(0, 3), tipFn: (i) => `${WEEKDAYS[i]}: ${fmt(week[i])} lives (${fmt((100 * week[i]) / L.length, 1)}%)` })));
+
+  const firstBorn = L.reduce((a, l) => (l.born < a ? l.born : a), L[0].born);
+  const months = [];
+  for (let d = new Date(firstBorn.getFullYear(), firstBorn.getMonth(), 1), now = new Date(); d <= now; d.setMonth(d.getMonth() + 1)) months.push(ym(d));
+  const mCount = new Map(months.map((m) => [m, 0])); L.forEach((l) => { const k = ym(l.born); if (mCount.has(k)) mCount.set(k, mCount.get(k) + 1); });
+  const mVals = months.map((m) => mCount.get(m));
+  const mLabel = (s) => { const [y, m] = s.split("-"); return `${MONTHS[+m - 1]} ${y.slice(2)}`; };
+  box.appendChild(card("Lives per month", "From your first life to this month", lineChart(months, mVals, {
+    labelFn: mLabel, tipFn: (i) => `${mLabel(months[i])}: ${fmt(mVals[i])} lives` })));
+
+  const ages = L.map((l) => l.age).filter((a) => a <= 60);
+  box.appendChild(card("Age at death", "Smoothed distribution, ages 0 to 60", ages.length > 1 ? density(ages) : null));
+
+  const merged = (c) => (/boar/i.test(c) ? "Boar" : c);
+  box.appendChild(card("Causes of death", "Top 10. All boars are grouped together", rankedBars(countBy(L, (l) => merged(l.diedTo)))));
+
+  box.appendChild(card("Character sex", "Share of all lives", donut(countBy(L, (l) => l.sex))));
+
+  box.appendChild(card("First names", "Top 10, not counting EVE", rankedBars(countBy(L, (l) => (l.name && l.name !== "EVE" ? l.name : null)))));
+  box.appendChild(card("Family names", "Top 10 surnames", rankedBars(countBy(L, (l) => l.surname))));
+
+  const dayMap = new Map();
+  L.forEach((l) => { if (l.born <= new Date()) { const k = ymd(l.born); dayMap.set(k, (dayMap.get(k) || 0) + l.age / 60); } });
+  const keys = [...dayMap.keys()].sort();
+  const days = [];
+  if (keys.length) {
+    const [y0, m0, d0] = keys[0].split("-").map(Number), [y1, m1, d1] = keys[keys.length - 1].split("-").map(Number);
+    for (let d = new Date(y0, m0 - 1, d0), end = new Date(y1, m1 - 1, d1); d <= end; d.setDate(d.getDate() + 1)) days.push(ymd(d));
+  }
+  box.appendChild(card("Hours played per day", "Each bar is one calendar day", days.length ? dailyChart(days, days.map((d) => dayMap.get(d) || 0)) : null, { wide: true }));
+
+  renderTable(L);
+}
+
+// ---------- Tooltip ----------
+const tip = $("tip");
+function showTip(e, str) { tip.textContent = str; tip.hidden = false; tip.style.left = e.clientX + "px"; tip.style.top = e.clientY + "px"; }
+document.addEventListener("pointermove", (e) => {
+  const t = e.target;
+  if (t instanceof Element && t.hasAttribute("data-tip")) return showTip(e, t.getAttribute("data-tip"));
+  if (t instanceof Element && t.hasAttribute("data-daily")) {
+    const svg = t.ownerSVGElement, r = svg.getBoundingClientRect(), scale = t.__w / r.width;
+    const i = Math.floor(((e.clientX - r.left) * scale - t.__left) / t.__band);
+    if (i >= 0 && i < t.__days.length) {
+      const d = t.__days[i], [yy, mm, dd] = d.split("-").map(Number);
+      return showTip(e, `${WEEKDAYS[(new Date(yy, mm - 1, dd).getDay() + 6) % 7].slice(0, 3)} ${d}: ${fmt(t.__hours[i], 2)} h`);
+    }
+  }
+  tip.hidden = true;
+});
+document.addEventListener("pointerleave", () => (tip.hidden = true));
+
+// ---------- Saving ----------
+function download(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+const fileBase = () => (PLAYER || "player").replace(/[^A-Za-z0-9]+/g, "") || "player";
+
+async function saveImage() {
+  if (!LIVES.length) return setStatus("Load some lives first.", true);
+  const cards = [...$("charts").children].filter((c) => c.__svg);
+  const S = 2, colW = 640, gap = 20, padX = 30, head = 110, W = padX * 2 + colW * 2 + gap;
+  const items = [];
+  let yy = head, col = 0, rowH = 0;
+  for (const c of cards) {
+    const vb = c.__svg.viewBox.baseVal, wide = c.classList.contains("wide");
+    const w = wide ? colW * 2 + gap : colW, h = 54 + (vb.height * (w - 20)) / vb.width;
+    if (wide && col === 1) { yy += rowH + gap; col = 0; rowH = 0; }
+    items.push({ c, x: padX + col * (colW + gap), y: yy, w, h });
+    rowH = Math.max(rowH, h);
+    if (wide || col === 1) { yy += rowH + gap; col = 0; rowH = 0; } else col = 1;
+  }
+  const H = yy + (col ? rowH + gap : 0) + 20;
+  const cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
+  const g = cv.getContext("2d"); g.scale(S, S);
+  const cs = getComputedStyle(document.documentElement), tok = (n) => cs.getPropertyValue(n).trim();
+  g.fillStyle = tok("--bg"); g.fillRect(0, 0, W, H);
+  g.fillStyle = tok("--ink"); g.font = `700 30px ${tok("--font-display")}`; g.fillText(PLAYER ? `OHOL Life Stats: ${PLAYER}` : "OHOL Life Stats", padX, 50);
+  g.font = `15px ${FONT}`; g.fillStyle = tok("--ink-2");
+  g.fillText([...$("tiles").children].map((t) => `${t.children[0].textContent} ${t.children[1].textContent}`).join("     "), padX, 82);
+  for (const it of items) {
+    g.fillStyle = tok("--surface"); g.strokeStyle = tok("--line");
+    g.beginPath(); g.roundRect(it.x, it.y, it.w, it.h, 10); g.fill(); g.stroke();
+    g.fillStyle = tok("--ink"); g.font = `500 17px ${tok("--font-display")}`; g.fillText(it.c.__title, it.x + 14, it.y + 26);
+    g.fillStyle = tok("--ink-3"); g.font = `13px ${FONT}`; g.fillText(it.c.__sub, it.x + 14, it.y + 44);
+    const clone = it.c.__svg.cloneNode(true);
+    clone.querySelectorAll("[data-tip],[data-daily]").forEach((n) => { if (n.getAttribute("fill") === "transparent") n.remove(); });
+    const src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+    const img = new Image();
+    await new Promise((ok, bad) => { img.onload = ok; img.onerror = bad; img.src = src; });
+    const vb = it.c.__svg.viewBox.baseVal, dw = it.w - 20;
+    g.drawImage(img, it.x + 10, it.y + 52, dw, (vb.height * dw) / vb.width);
+  }
+  cv.toBlob((b) => download(b, `OHOL_stats_${fileBase()}_${ymd(new Date())}.png`), "image/png");
+}
+
+function saveCsv() {
+  if (!LIVES.length) return setStatus("Load some lives first.", true);
+  const q = (s) => (/[",\n]/.test(s) ? `"${String(s).replace(/"/g, '""')}"` : s);
+  const lines = [["Date", "Month", "Day", "Name", "Surname", "Life ID", "Age", "Sex", "Location", "Died to", "Born", "Died"].join(",")];
+  for (const l of LIVES) {
+    lines.push([ymd(l.born), ym(l.born), WEEKDAYS[(l.born.getDay() + 6) % 7], l.name || "", l.surname || "", l.lifeId, l.age,
+      l.sex, l.location, l.diedTo, `${ymd(l.born)} ${hms(l.born)}`, `${ymd(l.died)} ${hms(l.died)}`].map(q).join(","));
+  }
+  download(new Blob([lines.join("\n")], { type: "text/csv" }), `OHOL_lives_${fileBase()}.csv`);
+}
+
+// ---------- Bookmarklet ----------
+function appUrl() {
+  const h = location.hostname;
+  if (/\.github\.io$/.test(h) || h === "localhost" || h === "127.0.0.1" || location.protocol === "file:")
+    return location.href.split("#")[0];
+  return DEFAULT_APP_URL;
+}
+
+// Runs on oholcurse.com, where reading the site is allowed. It sends the rows to this page.
+function bookmarkletSource(APP) {
+  return `(async()=>{const APP=${JSON.stringify(APP)};
+const box=document.createElement('div');box.style.cssText='position:fixed;z-index:99999;top:16px;right:16px;max-width:360px;background:#1d2620;color:#f4f6f1;font:14px/1.4 system-ui,sans-serif;padding:12px 14px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.3)';
+const say=(t)=>{box.textContent=t;};document.body.appendChild(box);setTimeout(()=>box.remove(),20000);
+const m=location.pathname.match(/[0-9a-f]{40}/i);
+if(location.hostname!=='oholcurse.com'||!m){say('OHOL Stats: open a player page on oholcurse.com first, then click the bookmark again.');return;}
+const w=window.open(APP+'#from-oholcurse','ohol_stats');
+if(!w){say('OHOL Stats: the new tab was blocked. Allow pop ups for oholcurse.com and click again.');return;}
+say('OHOL Stats: reading lives...');
+let ready=false,payload=null;const target=new URL(APP).origin;
+const send=()=>{if(ready&&payload){w.postMessage(payload,target);say('OHOL Stats: sent '+payload.rows.length+' lives to the charts tab.');}};
+addEventListener('message',(e)=>{if(e.source===w&&e.data&&e.data.type==='ohol-ready'){ready=true;send();}});
+try{const html=await fetch('/player/lives/'+m[0]).then(r=>r.text());
+const d=new DOMParser().parseFromString(html,'text/html');
+const comp=d.getElementById('take').closest('[wire\\\\:snapshot]');
+const tok=d.querySelector('meta[name=csrf-token]').content;
+const r=await fetch('/livewire/update',{method:'POST',headers:{'Content-Type':'application/json','X-Livewire':''},body:JSON.stringify({_token:tok,components:[{snapshot:comp.getAttribute('wire:snapshot'),updates:{take:'99999',order:'desc'},calls:[{path:'',method:'updateLimit',params:[]}]}]})});
+const t=new DOMParser().parseFromString((await r.json()).components[0].effects.html,'text/html');
+const rows=[...t.querySelectorAll('table tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent.replace(/\\s+/g,' ').trim()));
+payload={type:'ohol-lives',version:1,player:d.title.split('Lives for ').pop().trim(),utc:!d.querySelector('a[href$="/logout"]'),rows};
+say('OHOL Stats: read '+rows.length+' lives.');send();
+}catch(err){say('OHOL Stats: could not read the lives list ('+err.message+'). The site layout may have changed.');}})();`;
+}
+$("bmLink").href = "javascript:" + encodeURIComponent(bookmarkletSource(appUrl()));
+$("bmLink").addEventListener("click", (e) => { e.preventDefault(); setStatus("Drag the OHOL Stats button to your bookmarks bar, then click it on an oholcurse.com player page."); });
+
+window.addEventListener("message", (e) => {
+  if (e.origin !== OHOL_ORIGIN) return;
+  const d = e.data;
+  if (!d || d.type !== "ohol-lives" || !Array.isArray(d.rows)) return;
+  load(livesFromBookmarklet(d.rows, !!d.utc), String(d.player || "").slice(0, 80), "OHOLCurse");
+  try { localStorage.setItem("ohol-last", JSON.stringify(d)); } catch (_) {}
+});
+if (location.hash === "#from-oholcurse" && window.opener) {
+  setStatus("Waiting for OHOLCurse to send the lives ...");
+  try { window.opener.postMessage({ type: "ohol-ready" }, OHOL_ORIGIN); } catch (_) {}
+}
+
+// ---------- Wiring ----------
+const drop = $("drop"), input = $("fileInput");
+input.addEventListener("change", () => input.files[0] && readFile(input.files[0]));
+drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) readFile(f); });
+$("sampleBtn").addEventListener("click", () => load(samplePlayer(), "Sample player (made up data)", "the sample"));
+$("saveBtn").addEventListener("click", () => saveImage().catch((e) => setStatus("Could not save the image: " + e.message, true)));
+$("csvBtn").addEventListener("click", saveCsv);
+
+const rerender = () => LIVES.length && renderAll();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rerender);
+new MutationObserver(rerender).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+// Start with the last OHOLCurse player you opened, or the sample
+let started = false;
+if (location.hash !== "#from-oholcurse") {
+  try {
+    const last = JSON.parse(localStorage.getItem("ohol-last") || "null");
+    if (last && Array.isArray(last.rows)) { load(livesFromBookmarklet(last.rows, !!last.utc), last.player, "your last OHOLCurse visit"); started = true; }
+  } catch (_) {}
+}
+if (!started && location.hash !== "#from-oholcurse") load(samplePlayer(), "Sample player (made up data)", "the sample");
+})();
+</script>
+</body>
+</html>

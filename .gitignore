@@ -1,0 +1,10 @@
+output/
+*.jpg
+*.pdf
+*.csv
+*.xlsx
+.Rhistory
+.RData
+.Rproj.user/
+__pycache__/
+.DS_Store
