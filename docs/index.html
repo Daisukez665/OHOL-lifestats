@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Charts of one player's One Hour One Life history from OHOLCurse.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NEVK03VJ8F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NEVK03VJ8F');
+</script>
 <script data-goatcounter="https://ohol-stats.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>OHOL Life Stats</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1009,15 +1016,20 @@ function appUrl() {
 // Runs on oholcurse.com, where reading the site is allowed. It sends the rows to this page.
 function bookmarkletSource(APP, M) {
   return `(async()=>{const APP=${JSON.stringify(APP)};const M=${JSON.stringify(M)};
-const box=document.createElement('div');box.style.cssText='position:fixed;z-index:99999;top:16px;right:16px;max-width:360px;background:#1d2620;color:#f4f6f1;font:14px/1.4 system-ui,sans-serif;padding:12px 14px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.3)';
-const say=(t)=>{box.textContent=t;};document.body.appendChild(box);setTimeout(()=>box.remove(),20000);
+document.getElementById('ohol-stats-box')?.remove();
+const box=document.createElement('div');box.id='ohol-stats-box';box.style.cssText='position:fixed;z-index:99999;bottom:16px;right:16px;max-width:340px;display:flex;gap:10px;align-items:flex-start;background:#1d2620;color:#f4f6f1;font:14px/1.4 system-ui,sans-serif;padding:10px 12px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.3)';
+const msg=document.createElement('span');const x=document.createElement('button');x.textContent='\u00d7';x.title='Close';
+x.style.cssText='all:unset;cursor:pointer;font-size:18px;line-height:1;padding:0 2px;color:#f4f6f1';x.onclick=()=>box.remove();
+box.append(msg,x);document.body.appendChild(box);
+let timer=setTimeout(()=>box.remove(),20000);
+const say=(t,done)=>{msg.textContent=t;if(done){clearTimeout(timer);timer=setTimeout(()=>box.remove(),5000);}};
 const m=location.pathname.match(/[0-9a-f]{40}/i);
 if(location.hostname!=='oholcurse.com'||!m){say(M.notPlayer);return;}
 const w=window.open(APP+'#from-oholcurse','_blank');
 if(!w){say(M.blocked);return;}
 say(M.reading);
 let ready=false,payload=null;const target=new URL(APP).origin;
-const send=()=>{if(ready&&payload){w.postMessage(payload,target);say(M.sent.replace('N',payload.rows.length));}};
+const send=()=>{if(ready&&payload){w.postMessage(payload,target);say(M.sent.replace('N',payload.rows.length),true);}};
 addEventListener('message',(e)=>{if(e.source===w&&e.data&&e.data.type==='ohol-ready'){ready=true;send();}});
 try{const html=await fetch('/player/lives/'+m[0]).then(r=>r.text());
 const d=new DOMParser().parseFromString(html,'text/html');
