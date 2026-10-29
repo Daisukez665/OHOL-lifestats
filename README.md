@@ -41,7 +41,7 @@ If the new tab is blocked, allow pop ups for oholcurse.com and click the bookmar
 
 #### Or load a file
 
-Drop a CSV or Excel file onto the page. It works with the files from the Python or R script, and with any sheet that has an Age column and a Died column.
+Drop a CSV or Excel file onto the page. It works with the files from the Python or R script.
 
 #### On the page
 
@@ -126,9 +126,9 @@ Files go into an `output` folder:
 
 ## 中文
 
-根据 [OHOLCurse](https://oholcurse.com) 上的生命记录，画出一个玩家的《[One Hour One Life](https://onehouronelife.com)》（一小时人生）游戏统计图。
+根据 [OHOLCurse](https://oholcurse.com) 上的生命记录，画出玩家的《[One Hour One Life](https://onehouronelife.com)》（一小时人生）游戏统计图。
 
-这个工具有三种用法：网页版、Python 脚本和 R 脚本。网页版最简单，什么都不用安装。
+这个工具有三种用法：网页版、Python 脚本和 R 脚本。网页版最简单，无需安装。
 
 ### 统计内容
 
@@ -151,29 +151,29 @@ Files go into an `output` folder:
 
 #### 直接从 OHOLCurse 读取
 
-1. 在网页上，把 **OHOL Stats** 按钮拖到浏览器的书签栏。是拖，不是点。
+1. 在网页上，把 **OHOL Stats** 按钮拖到浏览器的书签栏。注意是按住拖拽。
 2. 在 oholcurse.com 上打开任意一个玩家的页面。可以按排行榜名、curse 名或角色名搜索。
 3. 点书签栏上的 **OHOL Stats**，会打开一个新标签页，显示这个玩家的统计图。
 
-书签必须在 oholcurse.com 的页面上点，因为浏览器不允许别的网站直接读取 OHOLCurse 的数据。
+书签必须在 oholcurse.com 的页面上点，因为浏览器不允其他的网站直接读取 OHOLCurse 的数据。
 
-如果新标签页被拦截，请允许 oholcurse.com 弹出窗口，然后再点一次书签。网页上有 Chrome、Edge、Firefox、Safari、iPhone、iPad 和安卓手机的详细步骤，点按钮下面的**怎么添加书签？**就能看到。
+如果新标签页被拦截，请允许 oholcurse.com 弹出窗口，然后再点一次书签。网页上有 Chrome、Edge、Firefox、Safari、iPhone、iPad 和安卓手机的详细步骤，点按钮下面的**怎么添加书签？**即可看到。
 
 #### 或者上传文件
 
-把 CSV 或 Excel 文件拖到网页上。可以用 Python 或 R 脚本导出的文件，也可以用任何带 Age 和 Died 两列的表格。
+把 CSV 或 Excel 文件拖拽到网页上。可用 Python 或 R 脚本导出的文件。
 
 #### 网页上的功能
 
 * **时间范围**：近 1 个月、近 3 个月、近 6 个月、近 1 年、全部。
-* **Donkey Town**：默认不统计 Donkey Town 里的生命。勾选**包含 Donkey Town** 就会算进去。
-* **保存统计图**会把所有图存成一张 PNG 图片。**保存 CSV** 会把全部生命记录存成表格。
+* **Donkey Town**：默认不统计 Donkey Town 里的生命，除非勾选**包含 Donkey Town** 。
+* **保存统计图**会把所有图存成一张 PNG 图片。**保存 CSV** 会把全部生命记录存成csv表格。
 * 右上角的 **English / 中文** 可以切换语言。
-* 网页会记住你上次从 OHOLCurse 读取的玩家。
+* 网页会记住你上次从 OHOLCurse 读取的数据。
 
 ### Python 版
 
-先安装需要的包（只需要一次）：
+先安装需要的包（只需一次）：
 
 ```bash
 pip install requests beautifulsoup4 pandas matplotlib pillow scipy openpyxl
@@ -196,7 +196,7 @@ python3 ohol_stats.py "<名字>" --out results          # 输出文件夹
 
 ### R 版
 
-先安装需要的包（只需要一次）：
+先安装需要的包（只需一次）：
 
 ```r
 install.packages(c("httr2", "rvest", "xml2", "jsonlite", "lubridate",
@@ -215,7 +215,7 @@ Rscript ohol_stats.R "Firstname Lastname" [MyName]
 
 ### Python 和 R 版怎么指定玩家
 
-下面任何一种都可以：
+以下任何一种都可：
 
 * 排行榜名，比如 `"Firstname Lastname"`
 * curse 名
@@ -223,7 +223,7 @@ Rscript ohol_stats.R "Firstname Lastname" [MyName]
 * 玩家页面的网址，`https://oholcurse.com/player/lives/<hash>`
 * 40 位的玩家 hash
 
-搜索顺序和 oholcurse.com 的搜索框一样：先按排行榜名，再按 curse 名，最后按角色名。名字里有空格的话要加引号。如果一个名字对应好几个玩家，脚本会列出他们的名字和 hash，然后停下来，让你选一个。
+搜索顺序和 oholcurse.com 的搜索框一样：先按排行榜名，再按 curse 名，最后按角色名。名字里有空格的话要加引号。如果一个名字对应好几个玩家，脚本会列出他们的名字和 hash，让你选择一个。
 
 ### Python 和 R 版的输出
 
@@ -234,8 +234,8 @@ Rscript ohol_stats.R "Firstname Lastname" [MyName]
 
 ### 说明
 
-* 不需要登录。OHOLCurse 上的生命记录是公开的。
-* OHOLCurse 给的是 UTC 时间，工具会自动转换成你所在的时区。
+* 无需登录。OHOLCurse 上的生命记录是公开的。
+* OHOLCurse 给的是 UTC 时间，会自动转换成你所在的时区。
 * 游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。
 * 被其他玩家杀死统一记为 `killer`。各种野猪合并成 `Boar`。
 * 网页版根据坐标识别 Donkey Town 的生命，它在普通世界很远的西边。Python 和 R 版会统计全部生命。
