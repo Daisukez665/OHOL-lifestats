@@ -3,7 +3,7 @@ OHOL play statistics from oholcurse.com.
 Reads every life of one player (no login needed) and draws summary charts.
 
 Usage:
-    python3 ohol_stats.py <player name, URL or hash> [file name]
+    python3 ohol_stats.py <player name, URL or hash> [file name] [--include-dt]
 
 Examples:
     python3 ohol_stats.py "Firstname Lastname"
@@ -159,6 +159,10 @@ def parse_lives_table(html, tz=None):
     df["Date"] = df["Born"].dt.strftime("%Y-%m-%d")
     df["Month"] = df["Born"].dt.strftime("%Y-%m")
     df["Day"] = [WEEKDAYS[d] for d in df["Born"].dt.weekday]
+    # Donkey Town sits far to the west, around x = -200,000,000.
+    # The normal world stays within about a million.
+    x = pd.to_numeric(df["Location"].str.split("/").str[0].str.strip(), errors="coerce")
+    df["Donkey Town"] = x.le(-1e8).fillna(False)
     return df
 
 
@@ -310,6 +314,8 @@ def main():
     ap.add_argument("--tz", default=None,
                     help='time zone, for example "America/Toronto" (default: this computer)')
     ap.add_argument("--out", default="output", help="output folder (default: output)")
+    ap.add_argument("--include-dt", action="store_true",
+                    help="also count lives in Donkey Town (left out by default)")
     a = ap.parse_args()
 
     data = fetch_ohol_lives(a.player, tz=a.tz)
@@ -318,9 +324,16 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cols = ["Date", "Month", "Day", "Name", "Surname", "Life ID", "Age", "Sex",
-            "Location", "Died to", "Born", "Died"]
+            "Location", "Died to", "Born", "Died", "Donkey Town"]
     data[cols].to_csv(out_dir / f"OHOL_lives_{name}.csv", index=False)
     data[cols].to_excel(out_dir / f"OHOL_lives_{name}.xlsx", sheet_name="Record", index=False)
+
+    # The files above keep every life. The charts leave out Donkey Town unless --include-dt is given.
+    if not a.include_dt:
+        n_dt = int(data["Donkey Town"].sum())
+        if n_dt:
+            print(f"Left out {n_dt} Donkey Town lives. Use --include-dt to count them.")
+        data = data[~data["Donkey Town"]].copy()
     make_plots(data, name, out_dir)
 
 
