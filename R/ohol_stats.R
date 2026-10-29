@@ -1,7 +1,7 @@
 # ==========================================================
 # OHOL play statistics from oholcurse.com
 # Usage:
-#   Rscript ohol_stats.R "<player name, URL or hash>" [file name]
+#   Rscript ohol_stats.R "<player name, URL or hash>" [file name] [--include-dt]
 #   for example: Rscript ohol_stats.R "Firstname Lastname"
 # or edit PLAYER below and click Source in RStudio.
 # Run it from the R folder so it can find ohol_fetch.R.
@@ -20,9 +20,12 @@ PLAYER <- "Your Leaderboard Name"   # or a curse name, character name, URL or ha
 NAME   <- ""                 # used in file names. Empty = name from the website
 my_tz  <- Sys.timezone()     # or for example "America/Toronto"
 out_dir <- "output"
+INCLUDE_DT <- FALSE           # TRUE = also count lives in Donkey Town
 # ------------------
 
 args <- commandArgs(trailingOnly = TRUE)
+if ("--include-dt" %in% args) INCLUDE_DT <- TRUE
+args <- args[!startsWith(args, "--")]
 if (length(args) >= 1) PLAYER <- args[1]
 if (length(args) >= 2) NAME <- args[2]
 
@@ -39,6 +42,12 @@ write.csv(Data, file.path(out_dir, paste0("OHOL_lives_", leaderboardName, ".csv"
 xl <- Data %>% mutate(across(c(Born, Died), ~ force_tz(.x, "UTC")))
 write.xlsx(xl, file.path(out_dir, paste0("OHOL_lives_", leaderboardName, ".xlsx")),
            sheetName = "Record", firstRow = TRUE, colWidths = "auto")
+# The files above keep every life. The charts leave out Donkey Town unless INCLUDE_DT is TRUE.
+if (!INCLUDE_DT) {
+  n_dt <- sum(Data$`Donkey Town`)
+  if (n_dt > 0) message("Left out ", n_dt, " Donkey Town lives. Use --include-dt to count them.")
+  Data <- Data %>% filter(!`Donkey Town`)
+}
 summary(Data)
 color<-c("#000000", "#e5a11c", "#5cb6ea", "#2b9f78", "#f0e54b", "#0076b4", "#d6641e", "#cc7daa")
 color_blind_friendly <- c("#000000", "#0072B2", "#D55E00", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")

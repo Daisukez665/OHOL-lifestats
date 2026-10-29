@@ -113,6 +113,11 @@ find_player_hash <- function(player, sess = ohol_session()) {
 }
 
 # ---------- Reading lives ----------
+is_donkey_town <- function(location) {
+  x <- suppressWarnings(as.numeric(trimws(sub("/.*$", "", location))))
+  !is.na(x) & x <= -1e8
+}
+
 # Turn the lives table HTML into a data frame
 .ohol_parse_table <- function(html, tz) {
   tab <- read_html(html) %>%
@@ -142,10 +147,13 @@ find_player_hash <- function(player, sess = ohol_session()) {
       Month          = format(Born, "%Y-%m"),
       Day            = WEEKDAYS[wday(Born, week_start = 1)],
       `Online Time`  = format(Born, "%H:%M:%S"),
-      `Offline Time` = format(Died, "%H:%M:%S")
+      `Offline Time` = format(Died, "%H:%M:%S"),
+      # Donkey Town sits far to the west, around x = -200,000,000.
+      # The normal world stays within about a million.
+      `Donkey Town`  = is_donkey_town(Location)
     ) %>%
     select(Date, Month, Day, Name, Surname, `Life ID`, Age, Sex, Location,
-           `Died to`, Born, Died, `Online Time`, `Offline Time`)
+           `Died to`, Born, Died, `Online Time`, `Offline Time`, `Donkey Town`)
 }
 
 # player can be a name, the player page URL, or the hash
