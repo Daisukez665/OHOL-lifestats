@@ -3,10 +3,6 @@
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fxiyuez1.github.io%2FOneHourOneLife-Statistics%2F&label=website)](https://xiyuez1.github.io/OneHourOneLife-Statistics/)
 [![pages-build-deployment](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment)
 [![Last commit](https://img.shields.io/github/last-commit/XiyueZ1/OneHourOneLife-Statistics)](https://github.com/XiyueZ1/OneHourOneLife-Statistics/commits/main)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![JavaScript](https://img.shields.io/badge/web-JavaScript-f7df1e?logo=javascript&logoColor=black)
-![Python](https://img.shields.io/badge/Python-3-3776ab?logo=python&logoColor=white)
-![R](https://img.shields.io/badge/R-4-276dc3?logo=r&logoColor=white)
 
 [English](#english) | [中文](#中文)
 
