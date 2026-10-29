@@ -11,7 +11,7 @@
   gtag('js', new Date());
   gtag('config', 'G-NEVK03VJ8F');
 </script>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script data-goatcounter="https://ohol-stats.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>OHOL Life Stats</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -242,7 +242,7 @@ footer a { color: var(--ink-2); }
   </details>
 
   <footer data-i18n-html="footer">Data from <a href="https://oholcurse.com" target="_blank" rel="noopener">OHOLCurse</a>. One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.</footer>
-  <p class="visits" id="visits" hidden><span data-i18n="visits">Page views</span> <span id="busuanzi_value_page_pv"></span></p>
+  <p class="visits" id="visits" hidden><span data-i18n="visits">Page views</span> <span id="visitCount"></span></p>
 </div>
 <div class="tip" id="tip" hidden></div>
 
@@ -1076,12 +1076,13 @@ $("copyBm").addEventListener("click", () => {
   } catch (_) { fallback(); }
 });
 
-// ---------- Visit counter (only on the hosted copy) ----------
-(function watchVisits(tries) {
-  const v = $("busuanzi_value_page_pv");
-  if (v && /\d/.test(v.textContent)) { $("visits").hidden = false; return; }
-  if (tries > 0) setTimeout(() => watchVisits(tries - 1), 500);
-})(40);
+// ---------- Visit counter (GoatCounter, only on the hosted copy) ----------
+if (/\.github\.io$/.test(location.hostname)) {
+  fetch(`https://ohol-stats.goatcounter.com/counter/${encodeURIComponent(location.pathname)}.json`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => { if (d && d.count) { $("visitCount").textContent = d.count; $("visits").hidden = false; } })
+    .catch(() => {});
+}
 
 // ---------- Wiring ----------
 const drop = $("drop"), input = $("fileInput");
