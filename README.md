@@ -1,5 +1,13 @@
 # One Hour One Life Statistics
 
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fxiyuez1.github.io%2FOneHourOneLife-Statistics%2F&label=website)](https://xiyuez1.github.io/OneHourOneLife-Statistics/)
+[![pages-build-deployment](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/XiyueZ1/OneHourOneLife-Statistics/actions/workflows/pages/pages-build-deployment)
+[![Last commit](https://img.shields.io/github/last-commit/XiyueZ1/OneHourOneLife-Statistics)](https://github.com/XiyueZ1/OneHourOneLife-Statistics/commits/main)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![JavaScript](https://img.shields.io/badge/web-JavaScript-f7df1e?logo=javascript&logoColor=black)
+![Python](https://img.shields.io/badge/Python-3-3776ab?logo=python&logoColor=white)
+![R](https://img.shields.io/badge/R-4-276dc3?logo=r&logoColor=white)
+
 [English](#english) | [中文](#中文)
 
 ---
@@ -72,6 +80,7 @@ Options:
 python3 ohol_stats.py "<name>" MyName                # use MyName in the file names
 python3 ohol_stats.py "<name>" --tz America/Toronto   # time zone for the charts
 python3 ohol_stats.py "<name>" --out results          # output folder
+python3 ohol_stats.py "<name>" --include-dt           # also count Donkey Town lives
 ```
 
 ### R
@@ -89,9 +98,10 @@ Run from a terminal:
 ```bash
 cd R
 Rscript ohol_stats.R "Firstname Lastname" [MyName]
+Rscript ohol_stats.R "Firstname Lastname" --include-dt   # also count Donkey Town lives
 ```
 
-Or in RStudio: open `R/ohol_stats.R` and put a name or link into `PLAYER` at the top. Set the working directory to the R folder (Session, Set Working Directory, To Source File Location), then click **Source**.
+Or in RStudio: open `R/ohol_stats.R` and put a name or link into `PLAYER` at the top. Set the working directory to the R folder (Session, Set Working Directory, To Source File Location), then click **Source**. To count Donkey Town lives, set `INCLUDE_DT <- TRUE` at the top.
 
 ### Choosing a player in Python and R
 
@@ -109,7 +119,7 @@ Names are searched like the search box on oholcurse.com: leaderboard name first,
 
 Files go into an `output` folder:
 
-* `OHOL_lives_<name>.csv` and `OHOL_lives_<name>.xlsx`: one row per life
+* `OHOL_lives_<name>.csv` and `OHOL_lives_<name>.xlsx`: one row per life, with a `Donkey Town` column. These files always keep every life.
 * `OHOL_stats_<name>_<date>.jpg`: the chart image
 
 ### Notes
@@ -118,7 +128,7 @@ Files go into an `output` folder:
 * OHOLCurse gives times in UTC. They are converted to your own time zone.
 * One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.
 * Deaths by another player show as `killer`. All boar deaths are grouped as `Boar`.
-* On the web page, Donkey Town lives are found by their location, far to the west of the normal world. The Python and R scripts count all lives.
+* Most players never play in Donkey Town, so its lives are left out of the charts by default in all three versions. They are found by their location, far to the west of the normal world.
 * Each run sends only a few requests. Please be kind to OHOLCurse and do not run it in a loop.
 * If OHOLCurse changes its page layout, the tool may stop working. Please open an issue.
 
@@ -155,7 +165,7 @@ Files go into an `output` folder:
 2. 在 oholcurse.com 上打开任意一个玩家的页面。可以按排行榜名、curse 名或角色名搜索。
 3. 点书签栏上的 **OHOL Stats**，会打开一个新标签页，显示这个玩家的统计图。
 
-书签必须在 oholcurse.com 的页面上点，因为浏览器不允其他的网站直接读取 OHOLCurse 的数据。
+书签必须在 oholcurse.com 的页面上点，因为浏览器不允许其他的网站直接读取 OHOLCurse 的数据。
 
 如果新标签页被拦截，请允许 oholcurse.com 弹出窗口，然后再点一次书签。网页上有 Chrome、Edge、Firefox、Safari、iPhone、iPad 和安卓手机的详细步骤，点按钮下面的**怎么添加书签？**即可看到。
 
@@ -192,6 +202,7 @@ python3 ohol_stats.py "Firstname Lastname"
 python3 ohol_stats.py "<名字>" MyName                # 文件名里用 MyName
 python3 ohol_stats.py "<名字>" --tz America/Toronto   # 图表用的时区
 python3 ohol_stats.py "<名字>" --out results          # 输出文件夹
+python3 ohol_stats.py "<名字>" --include-dt           # 包含 Donkey Town 里的生命
 ```
 
 ### R 版
@@ -209,9 +220,10 @@ install.packages(c("httr2", "rvest", "xml2", "jsonlite", "lubridate",
 ```bash
 cd R
 Rscript ohol_stats.R "Firstname Lastname" [MyName]
+Rscript ohol_stats.R "Firstname Lastname" --include-dt   # 包含 Donkey Town 里的生命
 ```
 
-也可以用 RStudio：打开 `R/ohol_stats.R`，在开头的 `PLAYER` 里填玩家名字或网址。把工作目录设成 R 文件夹（Session，Set Working Directory，To Source File Location），然后点 **Source**。
+也可以用 RStudio：打开 `R/ohol_stats.R`，在开头的 `PLAYER` 里填玩家名字或网址。把工作目录设成 R 文件夹（Session，Set Working Directory，To Source File Location），然后点 **Source**。如需包含 Donkey Town 里的生命，把开头的 `INCLUDE_DT` 改成 `TRUE`。
 
 ### Python 和 R 版怎么指定玩家
 
@@ -229,7 +241,7 @@ Rscript ohol_stats.R "Firstname Lastname" [MyName]
 
 文件会保存在 `output` 文件夹里：
 
-* `OHOL_lives_<名字>.csv` 和 `OHOL_lives_<名字>.xlsx`：每一行是一次生命
+* `OHOL_lives_<名字>.csv` 和 `OHOL_lives_<名字>.xlsx`：每一行是一次生命。这两个文件保留全部生命，`Donkey Town` 列标出哪些是 Donkey Town 里的生命。
 * `OHOL_stats_<名字>_<日期>.jpg`：统计图
 
 ### 说明
@@ -238,7 +250,7 @@ Rscript ohol_stats.R "Firstname Lastname" [MyName]
 * OHOLCurse 给的是 UTC 时间，会自动转换成你所在的时区。
 * 游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。
 * 被其他玩家杀死统一记为 `killer`。各种野猪合并成 `Boar`。
-* 网页版根据坐标识别 Donkey Town 的生命，它在普通世界很远的西边。Python 和 R 版会统计全部生命。
+* 大部分玩家不在 Donkey Town 玩，所以三个版本默认都不统计 Donkey Town 里的生命。Donkey Town 的生命根据坐标识别，它在普通世界很远的西边。
 * 每次运行只发送几个请求。请不要循环运行，以免给 OHOLCurse 增加负担。
 * 如果 OHOLCurse 改了网页结构，这个工具可能会失效，欢迎提 issue。
 
