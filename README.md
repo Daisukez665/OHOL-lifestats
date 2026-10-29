@@ -1,47 +1,57 @@
-# OHOL play statistics
+# One Hour One Life Statistics
 
-Charts of your own [One Hour One Life](https://onehouronelife.com) history, built from the lives list on [OHOLCurse](https://oholcurse.com).
+[English](#english) | [中文](#中文)
 
-The script reads every life of one player straight from the website. No login and no manual copying are needed. It then saves the data as CSV and Excel, and draws one summary image with nine charts:
+---
 
-* lives per hour of the day
-* lives per day of the week
-* lives per month
-* age at death
-* top 10 causes of death
-* character sex
-* top 10 first names (without EVE)
-* top 10 family names
-* hours played per day
+## English
 
-The same tool is here in three forms: a web page, a Python script and an R script.
+Charts of one player's [One Hour One Life](https://onehouronelife.com) history, built from the lives list on [OHOLCurse](https://oholcurse.com).
 
-## Web page
+The tool comes in three forms: a web page, a Python script and an R script. The web page is the easiest. Nothing needs to be installed.
 
-Open the page at **https://xiyuez1.github.io/OneHourOneLife-Statistics/**. Nothing is installed and nothing is uploaded. Everything runs in your browser.
+### What you get
 
-There are two ways to load lives:
+* Hours played, number of lives, share of lives that reached 60, and average age
+* Lives per hour of the day
+* Lives per day of the week
+* Lives per month
+* Age at death
+* Top 10 causes of death
+* Character sex
+* Top 10 first names (without EVE)
+* Top 10 family names
+* Hours played per day
 
-* **From OHOLCurse, with a bookmark.** Drag the **OHOL Stats** button on the page to your bookmarks bar. Open any player on oholcurse.com, then click the bookmark. A new tab opens with that player's charts. The bookmark has to run on oholcurse.com itself, because browsers do not let other websites read OHOLCurse directly.
-* **From a file.** Drop in a CSV or Excel file from the Python or R script, or any sheet with Age and Died columns.
+### Web page
 
-The page can save the charts as one PNG image and the lives as CSV. It is in English and Chinese. Use the switch at the top right.
+Open **https://xiyuez1.github.io/OneHourOneLife-Statistics/**
 
-To host your own copy, turn on GitHub Pages for the `docs` folder of this repository (Settings, Pages, Deploy from a branch, `main` and `/docs`). If your copy lives at a different address, the bookmark on that copy points to it automatically.
+Everything runs in your browser. Your game data is never sent anywhere.
 
-## Choose a player
+#### Read a player straight from OHOLCurse
 
-Give the script any of these:
+1. On the web page, drag the **OHOL Stats** button to your browser's bookmarks bar. Drag it, do not click it.
+2. Open any player on oholcurse.com. You can search by leaderboard name, curse name or character name.
+3. Click the **OHOL Stats** bookmark. A new tab opens with that player's charts.
 
-* a leaderboard name, for example `"Firstname Lastname"`
-* a curse name
-* a character name, for example `"EVE SMITH"`
-* the player page address, `https://oholcurse.com/player/lives/<hash>`
-* the 40 character player hash
+The bookmark has to run on oholcurse.com itself, because browsers do not let other websites read OHOLCurse directly.
 
-Names are searched the same way as the search box on [oholcurse.com](https://oholcurse.com): leaderboard name first, then curse name, then character name. Put names with a space in quotes. If a name matches several players, the script lists them with their hashes and stops, so you can pick one.
+If the new tab is blocked, allow pop ups for oholcurse.com and click the bookmark again. The page has step by step help for Chrome, Edge, Firefox, Safari, iPhone, iPad and Android. Click **How do I add the bookmark?** under the button.
 
-## Python
+#### Or load a file
+
+Drop a CSV or Excel file onto the page. It works with the files from the Python or R script, and with any sheet that has an Age column and a Died column.
+
+#### On the page
+
+* **Time range:** last month, last 3 months, last 6 months, last year, or all time.
+* **Donkey Town:** lives in Donkey Town are left out by default. Tick **Include Donkey Town** to count them.
+* **Save chart image** saves all charts as one PNG. **Save CSV** saves every life as a table.
+* **English / 中文** at the top right switches the language.
+* The page remembers the last player you read from OHOLCurse.
+
+### Python
 
 Install once:
 
@@ -64,7 +74,7 @@ python3 ohol_stats.py "<name>" --tz America/Toronto   # time zone for the charts
 python3 ohol_stats.py "<name>" --out results          # output folder
 ```
 
-## R
+### R
 
 Install once:
 
@@ -81,26 +91,158 @@ cd R
 Rscript ohol_stats.R "Firstname Lastname" [MyName]
 ```
 
-Or in RStudio: open `R/ohol_stats.R`, put a name or link into `PLAYER` at the top, set the working directory to the R folder (Session, Set Working Directory, To Source File Location), then click **Source**.
+Or in RStudio: open `R/ohol_stats.R` and put a name or link into `PLAYER` at the top. Set the working directory to the R folder (Session, Set Working Directory, To Source File Location), then click **Source**.
 
-## Output
+### Choosing a player in Python and R
+
+Give the script any of these:
+
+* a leaderboard name, for example `"Firstname Lastname"`
+* a curse name
+* a character name, for example `"EVE SMITH"`
+* the player page address, `https://oholcurse.com/player/lives/<hash>`
+* the 40 character player hash
+
+Names are searched like the search box on oholcurse.com: leaderboard name first, then curse name, then character name. Put names with a space in quotes. If a name matches several players, the script lists them with their hashes and stops, so you can pick one.
+
+### Output of Python and R
 
 Files go into an `output` folder:
 
 * `OHOL_lives_<name>.csv` and `OHOL_lives_<name>.xlsx`: one row per life
 * `OHOL_stats_<name>_<date>.jpg`: the chart image
 
-## Notes
+### Notes
 
-* Times are converted from UTC to your computer's time zone, unless you set one.
-* A life's birth time is its death time minus its age in minutes, since one year in the game is one minute.
+* No login is needed. OHOLCurse shows lives to everyone.
+* OHOLCurse gives times in UTC. They are converted to your own time zone.
+* One year of age in the game is one minute, so a life's birth time is its death time minus its age in minutes.
 * Deaths by another player show as `killer`. All boar deaths are grouped as `Boar`.
-* The script sends a few requests per run. Please be kind to the website and do not run it in a tight loop.
-* If OHOLCurse changes its page layout, the script may stop working. Please open an issue.
+* On the web page, Donkey Town lives are found by their location, far to the west of the normal world. The Python and R scripts count all lives.
+* Each run sends only a few requests. Please be kind to OHOLCurse and do not run it in a loop.
+* If OHOLCurse changes its page layout, the tool may stop working. Please open an issue.
 
-## 中文说明
+---
 
-这个工具直接从 OHOLCurse 读取某个玩家的全部生命记录，不需要登录，然后导出 CSV 和 Excel，并画一张包含九个统计图的总图。也可以用网页版 https://xiyuez1.github.io/OneHourOneLife-Statistics/ ：在 oholcurse 的玩家页面上点书签，或者把 CSV、Excel 文件拖进网页，直接出图。网页右上角可以切换中文和英文。运行时直接写排行榜名、curse 名或角色名就行，比如 "Firstname Lastname"，也可以用玩家页面的网址或 hash。用法见上面的 Python 和 R 两部分。
+## 中文
+
+根据 [OHOLCurse](https://oholcurse.com) 上的生命记录，画出一个玩家的《[One Hour One Life](https://onehouronelife.com)》（一小时人生）游戏统计图。
+
+这个工具有三种用法：网页版、Python 脚本和 R 脚本。网页版最简单，什么都不用安装。
+
+### 统计内容
+
+* 游戏总时长、生命次数、活到 60 岁的比例、平均寿命
+* 一天中每个小时开始的生命次数
+* 星期几开始的生命次数
+* 每月生命次数
+* 死亡年龄的分布
+* 死因前十名
+* 角色性别
+* 名字前十名（不含 EVE）
+* 姓氏前十名
+* 每天游戏时长
+
+### 网页版
+
+打开 **https://xiyuez1.github.io/OneHourOneLife-Statistics/**
+
+所有计算都在你的浏览器里完成，游戏数据不会发送到任何地方。
+
+#### 直接从 OHOLCurse 读取
+
+1. 在网页上，把 **OHOL Stats** 按钮拖到浏览器的书签栏。是拖，不是点。
+2. 在 oholcurse.com 上打开任意一个玩家的页面。可以按排行榜名、curse 名或角色名搜索。
+3. 点书签栏上的 **OHOL Stats**，会打开一个新标签页，显示这个玩家的统计图。
+
+书签必须在 oholcurse.com 的页面上点，因为浏览器不允许别的网站直接读取 OHOLCurse 的数据。
+
+如果新标签页被拦截，请允许 oholcurse.com 弹出窗口，然后再点一次书签。网页上有 Chrome、Edge、Firefox、Safari、iPhone、iPad 和安卓手机的详细步骤，点按钮下面的**怎么添加书签？**就能看到。
+
+#### 或者上传文件
+
+把 CSV 或 Excel 文件拖到网页上。可以用 Python 或 R 脚本导出的文件，也可以用任何带 Age 和 Died 两列的表格。
+
+#### 网页上的功能
+
+* **时间范围**：近 1 个月、近 3 个月、近 6 个月、近 1 年、全部。
+* **Donkey Town**：默认不统计 Donkey Town 里的生命。勾选**包含 Donkey Town** 就会算进去。
+* **保存统计图**会把所有图存成一张 PNG 图片。**保存 CSV** 会把全部生命记录存成表格。
+* 右上角的 **English / 中文** 可以切换语言。
+* 网页会记住你上次从 OHOLCurse 读取的玩家。
+
+### Python 版
+
+先安装需要的包（只需要一次）：
+
+```bash
+pip install requests beautifulsoup4 pandas matplotlib pillow scipy openpyxl
+```
+
+运行：
+
+```bash
+cd python
+python3 ohol_stats.py "Firstname Lastname"
+```
+
+其他选项：
+
+```bash
+python3 ohol_stats.py "<名字>" MyName                # 文件名里用 MyName
+python3 ohol_stats.py "<名字>" --tz America/Toronto   # 图表用的时区
+python3 ohol_stats.py "<名字>" --out results          # 输出文件夹
+```
+
+### R 版
+
+先安装需要的包（只需要一次）：
+
+```r
+install.packages(c("httr2", "rvest", "xml2", "jsonlite", "lubridate",
+                   "dplyr", "tidyr", "ggplot2", "gridExtra", "cowplot", "openxlsx"),
+                 repos = "https://cloud.r-project.org")
+```
+
+在终端里运行：
+
+```bash
+cd R
+Rscript ohol_stats.R "Firstname Lastname" [MyName]
+```
+
+也可以用 RStudio：打开 `R/ohol_stats.R`，在开头的 `PLAYER` 里填玩家名字或网址。把工作目录设成 R 文件夹（Session，Set Working Directory，To Source File Location），然后点 **Source**。
+
+### Python 和 R 版怎么指定玩家
+
+下面任何一种都可以：
+
+* 排行榜名，比如 `"Firstname Lastname"`
+* curse 名
+* 角色名，比如 `"EVE SMITH"`
+* 玩家页面的网址，`https://oholcurse.com/player/lives/<hash>`
+* 40 位的玩家 hash
+
+搜索顺序和 oholcurse.com 的搜索框一样：先按排行榜名，再按 curse 名，最后按角色名。名字里有空格的话要加引号。如果一个名字对应好几个玩家，脚本会列出他们的名字和 hash，然后停下来，让你选一个。
+
+### Python 和 R 版的输出
+
+文件会保存在 `output` 文件夹里：
+
+* `OHOL_lives_<名字>.csv` 和 `OHOL_lives_<名字>.xlsx`：每一行是一次生命
+* `OHOL_stats_<名字>_<日期>.jpg`：统计图
+
+### 说明
+
+* 不需要登录。OHOLCurse 上的生命记录是公开的。
+* OHOLCurse 给的是 UTC 时间，工具会自动转换成你所在的时区。
+* 游戏里 1 岁等于 1 分钟，所以出生时间等于死亡时间减去年龄对应的分钟数。
+* 被其他玩家杀死统一记为 `killer`。各种野猪合并成 `Boar`。
+* 网页版根据坐标识别 Donkey Town 的生命，它在普通世界很远的西边。Python 和 R 版会统计全部生命。
+* 每次运行只发送几个请求。请不要循环运行，以免给 OHOLCurse 增加负担。
+* 如果 OHOLCurse 改了网页结构，这个工具可能会失效，欢迎提 issue。
+
+---
 
 ## Licence
 
